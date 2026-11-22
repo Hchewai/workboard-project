@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -10,7 +10,10 @@ import {
   CalendarDays,
   Layers,
   X,
+  LogOut,
 } from "lucide-react";
+
+import { logout } from "../../lib/auth";
 
 const navigation = [
   {
@@ -37,6 +40,12 @@ const navigation = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  function handleLogout() {
+    logout();
+    router.replace("/login");
+  }
 
   return (
     <>
@@ -97,6 +106,14 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="sidebar-footer">
           <span>WORKBOARD</span>
           <span>Project Management</span>
+
+          <button
+            className="sidebar-link"
+            onClick={handleLogout}
+          >
+            <LogOut size={19} />
+            <span>Log Out</span>
+          </button>
         </div>
       </aside>
     </>
