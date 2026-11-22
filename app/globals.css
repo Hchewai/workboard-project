@@ -542,17 +542,30 @@ a {
   min-width: 0;
 }
 
-.task-priority.high {
-  color: #fca5a5;
-  background: rgba(239, 68, 68, 0.12);
+
+
+/* Dashboard task statuses */
+
+.task-status {
+  flex-shrink: 0;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  white-space: nowrap;
+  text-transform: capitalize;
 }
 
-.task-priority.medium {
+.task-status.todo {
   color: #e5c27b;
   background: rgba(234, 179, 8, 0.12);
 }
 
-.task-priority.low {
+.task-status.in_progress {
+  color: #bca8ff;
+  background: rgba(139, 92, 246, 0.13);
+}
+
+.task-status.done {
   color: #86d5a0;
   background: rgba(34, 197, 94, 0.12);
 }
@@ -617,6 +630,42 @@ a {
   transform: translateY(-2px);
 }
 
+
+/* Projects page header */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.project-create-button {
+  padding: 10px 16px;
+
+  color: white;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition: background 0.2s ease;
+}
+
+.project-create-button:hover {
+  background: var(--accent-hover);
+}
+
+@media (max-width: 576px) {
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 /* Card heading */
 
 .project-card-header {
@@ -647,6 +696,40 @@ a {
   overflow-wrap: anywhere;
 }
 
+
+.project-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-delete-button {
+  padding: 10px 16px;
+
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 7px;
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.project-delete-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.project-delete-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 576px) {
+  .project-actions {
+    flex-wrap: wrap;
+  }
+}
 /* Card footer */
 
 .project-card-footer {

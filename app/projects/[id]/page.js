@@ -2,24 +2,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import api from "../../../lib/api";
 import AppShell from "../../../components/layout/AppShell";
+import ProjectForm from "../../../components/projects/ProjectForm";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+
   const [error, setError] = useState("");
+  const [modalError, setModalError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+
+const [deleting, setDeleting] = useState(false);
+const [deleteError, setDeleteError] = useState("");
+
+  // Fetch individual project
+  async function fetchProject() {
+    const response = await api.get(`/projects/${id}`);
+
+    setProject(response.data);
+
+    return response.data;
+  }
 
   useEffect(() => {
-    async function fetchProject() {
+    async function loadProject() {
       try {
-        const response = await api.get(`/projects/${id}`);
-
-        setProject(response.data);
+        await fetchProject();
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -31,9 +47,127 @@ export default function ProjectDetailsPage() {
     }
 
     if (id) {
-      fetchProject();
+      loadProject();
     }
   }, [id]);
+
+  // Wait for the updated project to appear
+  async function waitForProjectUpdate(updatedData) {
+    const maxAttempts = 30;
+    const interval = 2000;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, interval)
+      );
+
+      try {
+        const latestProject = await fetchProject();
+
+        const isUpdated =
+          latestProject.name === updatedData.name.trim() &&
+          (latestProject.description || "") ===
+            updatedData.description.trim();
+
+        if (isUpdated) {
+          return true;
+        }
+      } catch (error) {
+        // Continue polling if a temporary request error occurs
+      }
+    }
+
+    return false;
+  }
+
+  // Update project
+  async function handleUpdateProject(projectData) {
+    if (!projectData.name.trim()) {
+      setModalError("Please enter a project name.");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setModalError("");
+
+      await api.put(`/projects/${id}`, {
+        name: projectData.name.trim(),
+        description: projectData.description.trim(),
+      });
+
+      const projectUpdated = await waitForProjectUpdate(
+        projectData
+      );
+
+      if (projectUpdated) {
+        setIsModalOpen(false);
+        setModalError("");
+      } else {
+        setModalError(
+          "The API accepted your changes, but the updated project hasn't appeared yet. Please try refreshing shortly."
+        );
+      }
+    } catch (error) {
+      setModalError(
+        error.response?.data?.message ||
+        "Unable to update project."
+      );
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function handleDeleteProject() {
+  const confirmed = window.confirm(
+    `Are you sure you want to delete "${project.name}"? This action cannot be undone.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setDeleting(true);
+    setDeleteError("");
+
+    // Send the DELETE request
+    await api.delete(`/projects/${id}`);
+
+    // Wait for the project to disappear from the API
+    const maxAttempts = 30;
+    const interval = 2000;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, interval)
+      );
+
+      try {
+        await api.get(`/projects/${id}`);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          // Project has been deleted
+          router.replace("/projects");
+          return;
+        }
+
+        throw error;
+      }
+    }
+
+    setDeleteError(
+      "The API accepted the deletion, but the project is still available. Please check again shortly."
+    );
+  } catch (error) {
+    setDeleteError(
+      error.response?.data?.message ||
+      "Unable to delete project."
+    );
+  } finally {
+    setDeleting(false);
+  }
+}
 
   if (loading) {
     return (
@@ -62,29 +196,50 @@ export default function ProjectDetailsPage() {
   return (
     <AppShell>
       <section className="project-details-page">
-        <div className="page-header">
-          <h1>{project.name}</h1>
-          <p>{project.description}</p>
-        </div>
 
-        <div className="project-details-panel">
-          <h2>Project Information</h2>
+       <div className="page-header">
+  <div>
+    <h1>{project.name}</h1>
+    <p>{project.description}</p>
+  </div>
 
-          <div className="project-detail-item">
-            <span>Project ID</span>
-            <p>{project.id}</p>
-          </div>
+  <div className="project-actions">
+    <button
+      type="button"
+      className="project-delete-button"
+      onClick={handleDeleteProject}
+      disabled={deleting || updating}
+    >
+      {deleting ? "Deleting..." : "Delete Project"}
+    </button>
 
-          <div className="project-detail-item">
-            <span>Created</span>
-            <p>{project.created?.human || "Unknown"}</p>
-          </div>
+    <button
+      type="button"
+      className="project-create-button"
+      onClick={() => {
+        setModalError("");
+        setIsModalOpen(true);
+      }}
+      disabled={deleting || updating}
+    >
+      Edit Project
+    </button>
+  </div>
+</div>
 
-          <div className="project-detail-item">
-            <span>Workspace</span>
-            <p>{project.workspace?.name || "Unknown"}</p>
-          </div>
-        </div>
+{deleteError && (
+  <p className="text-danger">{deleteError}</p>
+)}
+        {isModalOpen && (
+          <ProjectForm
+            initialProject={project}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleUpdateProject}
+            loading={updating}
+            error={modalError}
+          />
+        )}
+
       </section>
     </AppShell>
   );
