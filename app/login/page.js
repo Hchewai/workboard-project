@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "../../lib/auth";
+import { login, getToken } from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +12,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (getToken()) {
+      router.replace("/dashboard");
+    } else {
+      setChecking(false);
+    }
+  }, [router]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -24,11 +33,16 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (error) {
       setError(
-        error.response?.data?.message || "Unable to log in. Please try again."
+        error.response?.data?.message ||
+        "Unable to log in. Please try again."
       );
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checking) {
+    return <p>Checking authentication...</p>;
   }
 
   return (
