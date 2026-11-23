@@ -7,6 +7,7 @@ import api from "../../../lib/api";
 import TaskForm from "../../../components/tasks/TaskForm";
 import AppShell from "../../../components/layout/AppShell";
 import ChecklistList from "../../../components/checklist/ChecklistList";
+import CommentsSection from "../../../components/comments/CommentsSection";
 
 export default function TaskDetailsPage() {
   const params = useParams();
@@ -30,6 +31,7 @@ export default function TaskDetailsPage() {
   const [checklistActionLoading, setChecklistActionLoading] = useState(false);
   const [checklistActionError, setChecklistActionError] = useState("");
   const [updatingItemId, setUpdatingItemId] = useState(null);
+  const [deletingItemId, setDeletingItemId] = useState(null);
 
   useEffect(() => {
     async function fetchTask() {
@@ -170,7 +172,58 @@ export default function TaskDetailsPage() {
       setChecklistActionLoading(false);
     }
   }
+  async function handleDeleteChecklistItem(item) {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${item.label}"?`,
+    );
 
+    if (!confirmed) return;
+
+    try {
+      setDeletingItemId(item.id);
+      setChecklistActionError("");
+
+      await api.delete(`/checklist-items/${item.id}`);
+
+      let itemDeleted = false;
+
+      // Wait for the API to finish processing the deletion.
+      for (let attempt = 0; attempt < 15; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const response = await api.get("/checklist-items");
+
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data.data;
+
+        const taskItems = items.filter(
+          (checklistItem) => String(checklistItem.task_id) === String(id),
+        );
+
+        itemDeleted = !taskItems.some(
+          (checklistItem) => String(checklistItem.id) === String(item.id),
+        );
+
+        if (itemDeleted) {
+          setChecklistItems(taskItems);
+          break;
+        }
+      }
+
+      if (!itemDeleted) {
+        setChecklistActionError(
+          "The API accepted the deletion, but the item is still appearing. Please refresh shortly.",
+        );
+      }
+    } catch (error) {
+      setChecklistActionError(
+        error.response?.data?.message || "Unable to delete checklist item.",
+      );
+    } finally {
+      setDeletingItemId(null);
+    }
+  }
   async function handleToggleChecklistItem(item) {
     const isCompleted =
       item.completed === true || item.completed === 1 || item.completed === "1";
@@ -439,12 +492,15 @@ export default function TaskDetailsPage() {
               loading={checklistActionLoading}
               onToggle={handleToggleChecklistItem}
               updatingItemId={updatingItemId}
+              onDelete={handleDeleteChecklistItem}
+              deletingItemId={deletingItemId}
             />
           )}
 
           {checklistActionError && (
             <p className="form-error">{checklistActionError}</p>
           )}
+          <CommentsSection commentableType="task" commentableId={id} />
         </div>
         {actionError && <p className="form-error">{actionError}</p>}
 

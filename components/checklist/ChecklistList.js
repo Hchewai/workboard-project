@@ -10,6 +10,8 @@ export default function ChecklistList({
   loading,
   onToggle,
   updatingItemId,
+  onDelete,
+  deletingItemId,
 }) {
   return (
     <>
@@ -40,6 +42,8 @@ export default function ChecklistList({
               item={item}
               onToggle={onToggle}
               loading={String(updatingItemId) === String(item.id)}
+              onDelete={onDelete}
+              deleting={String(deletingItemId) === String(item.id)}
             />
           ))}
         </div>

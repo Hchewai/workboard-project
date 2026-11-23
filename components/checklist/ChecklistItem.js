@@ -1,4 +1,4 @@
-export default function ChecklistItem({ item, onToggle, loading }) {
+export default function ChecklistItem({ item, onToggle, onDelete, loading }) {
   const isCompleted =
     item.completed === true || item.completed === 1 || item.completed === "1";
 
@@ -23,6 +23,16 @@ export default function ChecklistItem({ item, onToggle, loading }) {
           {item.label}
         </span>
       </div>
+
+      <button
+        type="button"
+        className="checklist-delete-button"
+        onClick={() => onDelete(item)}
+        disabled={loading}
+        aria-label={`Delete ${item.label}`}
+      >
+        Delete
+      </button>
     </div>
   );
 }

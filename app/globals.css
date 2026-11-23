@@ -1188,3 +1188,103 @@ a {
 .checklist-item input[type="checkbox"]:disabled {
   cursor: wait;
 }
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.checklist-delete-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.checklist-delete-button:hover {
+  color: #ff7777;
+  border-color: #ff7777;
+}
+
+.checklist-delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comments-section {
+  margin-top: 24px;
+}
+
+.comments-header {
+  margin-bottom: 20px;
+}
+
+.comments-header p {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-item {
+  padding: 16px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.comment-item-header {
+  margin-bottom: 8px;
+}
+
+.comment-content {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+
+.comments-empty {
+  color: var(--text-secondary);
+  padding: 12px 0;
+}
+
+.comment-create-form {
+  margin-bottom: 24px;
+}
+
+.comment-create-form .form-group {
+  margin-bottom: 12px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.comment-item {
+  padding: 16px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.comment-item-header {
+  margin-bottom: 8px;
+}
+
+.comment-content {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
