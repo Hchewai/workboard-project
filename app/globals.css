@@ -542,8 +542,6 @@ a {
   min-width: 0;
 }
 
-
-
 /* Dashboard task statuses */
 
 .task-status {
@@ -570,9 +568,7 @@ a {
   background: rgba(34, 197, 94, 0.12);
 }
 
-
 /* Projects Page */
-
 
 /* =========================
    PROJECTS
@@ -621,15 +617,15 @@ a {
   border: 1px solid var(--border);
   border-radius: 10px;
 
-  transition: border-color 0.2s ease,
-              transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .project-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
 }
-
 
 /* Projects page header */
 
@@ -695,7 +691,6 @@ a {
 
   overflow-wrap: anywhere;
 }
-
 
 .project-actions {
   display: flex;
@@ -804,7 +799,6 @@ a {
   }
 }
 
-
 /* =========================
    PROJECT DETAILS
 ========================= */
@@ -847,7 +841,6 @@ a {
   font-size: 14px;
   overflow-wrap: anywhere;
 }
-
 
 /* Responsive layout */
 
@@ -901,7 +894,6 @@ a {
     font-size: 9px;
   }
 }
-
 
 /* =========================
    TASK PAGE
@@ -1024,7 +1016,6 @@ a {
   color: var(--text-secondary);
 }
 
-
 /* Task Search */
 
 .task-search {
@@ -1084,7 +1075,6 @@ a {
   color: var(--text-primary);
 }
 
-
 /* Responsive Tasks */
 
 @media (max-width: 768px) {
@@ -1103,4 +1093,98 @@ a {
   .task-arrow {
     margin-left: auto;
   }
+}
+
+/* Checklist */
+.checklist-section {
+  margin-top: 24px;
+}
+
+.checklist-header {
+  margin-bottom: 20px;
+}
+
+.checklist-header p {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+.checklist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.checklist-item-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checklist-status {
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+.checklist-status.completed {
+  color: #70c99a;
+}
+
+.checklist-label {
+  color: var(--text-primary);
+}
+
+.checklist-label.completed {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.checklist-empty {
+  color: var(--text-secondary);
+  padding: 12px 0;
+}
+
+.checklist-create-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.checklist-create-form .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.checklist-create-form button {
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+
+@media (max-width: 576px) {
+  .checklist-create-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checklist-item input[type="checkbox"]:disabled {
+  cursor: wait;
 }
