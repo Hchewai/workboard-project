@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import api from "../../../lib/api";
 import AppShell from "../../../components/layout/AppShell";
 import ProjectForm from "../../../components/projects/ProjectForm";
+import Button from "../../../components/ui/Button";
 import CommentsSection from "../../../components/comments/CommentsSection";
 export default function ProjectDetailsPage() {
   const { id } = useParams();
@@ -192,18 +193,17 @@ export default function ProjectDetailsPage() {
           </div>
 
           <div className="project-actions">
-            <button
-              type="button"
-              className="project-delete-button"
+            <Button
+              variant="danger"
               onClick={handleDeleteProject}
-              disabled={deleting || updating}
+              loading={deleting}
+              loadingText="Deleting..."
+              disabled={updating}
             >
-              {deleting ? "Deleting..." : "Delete Project"}
-            </button>
+              Delete Project
+            </Button>
 
-            <button
-              type="button"
-              className="project-create-button"
+            <Button
               onClick={() => {
                 setModalError("");
                 setIsModalOpen(true);
@@ -211,7 +211,7 @@ export default function ProjectDetailsPage() {
               disabled={deleting || updating}
             >
               Edit Project
-            </button>
+            </Button>
           </div>
         </div>
         <CommentsSection commentableType="project" commentableId={id} />

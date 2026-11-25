@@ -1,8 +1,10 @@
-
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
+import FormField from "../ui/FormField";
 
 export default function ProjectForm({
   onClose,
@@ -13,7 +15,7 @@ export default function ProjectForm({
 }) {
   const [name, setName] = useState(initialProject?.name || "");
   const [description, setDescription] = useState(
-    initialProject?.description || ""
+    initialProject?.description || "",
   );
 
   const isEditing = Boolean(initialProject);
@@ -28,98 +30,55 @@ export default function ProjectForm({
   }
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={(event) => {
-        if (event.target === event.currentTarget && !loading) {
-          onClose();
-        }
-      }}
+    <Modal
+      title={isEditing ? "Edit Project" : "Create New Project"}
+      description={
+        isEditing
+          ? "Update your project information."
+          : "Add a new project to your workspace."
+      }
+      onClose={onClose}
+      closeDisabled={loading}
     >
-      <div
-        className="project-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="project-modal-title"
-      >
-        <div className="project-modal-header">
-          <div>
-            <h2 id="project-modal-title">
-              {isEditing ? "Edit Project" : "Create New Project"}
-            </h2>
-            <p>
-              {isEditing
-                ? "Update your project information."
-                : "Add a new project to your workspace."}
-            </p>
-          </div>
+      <form onSubmit={handleSubmit}>
+        <FormField
+          label="Project Name"
+          name="project-name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Enter project name"
+          required
+        />
 
-          <button
+        <input type="hidden" name="project-name-max-length" value="" readOnly />
+
+        <FormField
+          label="Description"
+          name="project-description"
+          type="textarea"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Describe what this project is about..."
+          rows={4}
+        />
+
+        {error && <p className="ui-form-error">{error}</p>}
+
+        <div className="project-modal-actions">
+          <Button
             type="button"
-            className="modal-close"
+            variant="secondary"
             onClick={onClose}
             disabled={loading}
-            aria-label="Close modal"
           >
-            <X size={20} />
-          </button>
+            Cancel
+          </Button>
+
+          <Button type="submit" loading={loading}>
+            {isEditing ? "Save Changes" : "Create Project"}
+          </Button>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="project-form-group">
-            <label htmlFor="project-name">Project Name</label>
-
-            <input
-              id="project-name"
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Enter project name"
-              required
-              maxLength={255}
-            />
-          </div>
-
-          <div className="project-form-group">
-            <label htmlFor="project-description">Description</label>
-
-            <textarea
-              id="project-description"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Describe what this project is about..."
-              rows={4}
-            />
-          </div>
-
-          {error && (
-            <p className="project-form-error">{error}</p>
-          )}
-
-          <div className="project-modal-actions">
-            <button
-              type="button"
-              className="modal-cancel"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              className="modal-submit"
-              disabled={loading}
-            >
-              {loading
-                ? "Saving..."
-                : isEditing
-                  ? "Save Changes"
-                  : "Create Project"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

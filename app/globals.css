@@ -40,6 +40,253 @@ a {
   background: var(--background);
 }
 
+/* Base button */
+.ui-button {
+  padding: 10px 16px;
+
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.ui-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Primary - Create, Edit, Save, Add */
+.ui-button-primary {
+  color: white;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.ui-button-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Danger - Delete */
+.ui-button-danger {
+  color: white;
+  background: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.ui-button-danger:hover:not(:disabled) {
+  background: #bb2d3b;
+  border-color: #bb2d3b;
+}
+
+/* Secondary - Cancel */
+.ui-button-secondary {
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+}
+
+.ui-button-secondary:hover:not(:disabled) {
+  background: var(--border);
+}
+
+/* Form field container */
+.ui-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+/* Labels */
+.ui-form-label {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ui-required {
+  color: #f87171;
+}
+
+/* Inputs, textareas and dropdowns */
+.ui-form-control {
+  width: 100%;
+  padding: 11px 12px;
+
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Focus state */
+.ui-form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(148, 120, 223, 0.15);
+}
+
+/* Placeholder */
+.ui-form-control::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Textarea */
+textarea.ui-form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Dropdown */
+select.ui-form-control {
+  cursor: pointer;
+}
+
+/* Disabled fields */
+.ui-form-control:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Validation */
+.ui-form-control[aria-invalid="true"] {
+  border-color: #dc3545;
+}
+
+.ui-form-error {
+  color: #f87171;
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+/* Modal backdrop */
+.ui-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+}
+
+/* Modal container */
+.ui-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+/* Modal sizes */
+.ui-modal-large {
+  max-width: 650px;
+}
+
+/* Modal header */
+.ui-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 24px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.ui-modal-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Close button */
+.ui-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px;
+
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.ui-modal-close:hover {
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+}
+
+/* Modal content */
+.ui-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.ui-modal-header p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 5px 0 0;
+}
+
+.ui-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive modal */
+@media (max-width: 576px) {
+  .ui-modal-overlay {
+    padding: 12px;
+  }
+
+  .ui-modal-body {
+    padding: 18px;
+  }
+
+  .ui-modal-header {
+    padding: 16px 18px;
+  }
+}
+
 /* Sidebar */
 
 .sidebar {
@@ -775,6 +1022,13 @@ a {
   margin: 0;
   color: var(--text-secondary);
   font-size: 13px;
+}
+
+.project-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
 }
 
 /* Responsive projects */

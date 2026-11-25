@@ -1,4 +1,3 @@
-
 export default function FormField({
   label,
   name,
@@ -9,30 +8,32 @@ export default function FormField({
   required = false,
   options = [],
   rows = 3,
+  disabled = false,
+  error = "",
 }) {
+  const fieldProps = {
+    id: name,
+    name,
+    value,
+    onChange,
+    required,
+    disabled,
+    className: "ui-form-control",
+    "aria-invalid": Boolean(error),
+  };
+
   return (
-    <div className="form-group">
-      <label htmlFor={name}>{label}</label>
+    <div className="ui-form-group">
+      <label htmlFor={name} className="ui-form-label">
+        {label}
+        {required && <span className="ui-required"> *</span>}
+      </label>
 
       {type === "textarea" ? (
-        <textarea
-          id={name}
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          required={required}
-          rows={rows}
-        />
+        <textarea {...fieldProps} placeholder={placeholder} rows={rows} />
       ) : type === "select" ? (
-        <select
-          id={name}
-          name={name}
-          value={value}
-          onChange={onChange}
-          required={required}
-        >
-          <option value="">Select an option</option>
+        <select {...fieldProps}>
+          <option value="">{placeholder || "Select an option"}</option>
 
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -41,16 +42,10 @@ export default function FormField({
           ))}
         </select>
       ) : (
-        <input
-          id={name}
-          name={name}
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          required={required}
-        />
+        <input {...fieldProps} type={type} placeholder={placeholder} />
       )}
+
+      {error && <p className="ui-form-error">{error}</p>}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import TaskForm from "../../../components/tasks/TaskForm";
 import AppShell from "../../../components/layout/AppShell";
 import ChecklistList from "../../../components/checklist/ChecklistList";
 import CommentsSection from "../../../components/comments/CommentsSection";
+import Button from "../../../components/ui/Button";
 
 export default function TaskDetailsPage() {
   const params = useParams();
@@ -427,23 +428,17 @@ export default function TaskDetailsPage() {
           </div>
 
           <div className="project-detail-actions">
-            <button
-              type="button"
-              className="project-create-button"
-              onClick={openEditModal}
-              disabled={actionLoading}
-            >
+            <Button onClick={openEditModal} disabled={actionLoading}>
               Edit Task
-            </button>
+            </Button>
 
-            <button
-              type="button"
-              className="modal-cancel-button"
+            <Button
+              variant="danger"
               onClick={handleDeleteTask}
               disabled={actionLoading}
             >
               Delete Task
-            </button>
+            </Button>
           </div>
         </div>
 

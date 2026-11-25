@@ -1,4 +1,3 @@
-
 export default function Button({
   children,
   type = "button",
@@ -6,6 +5,7 @@ export default function Button({
   onClick,
   disabled = false,
   loading = false,
+  loadingText = "Loading...",
 }) {
   return (
     <button
@@ -14,7 +14,7 @@ export default function Button({
       onClick={onClick}
       disabled={disabled || loading}
     >
-      {loading ? "Loading..." : children}
+      {loading ? loadingText : children}
     </button>
   );
 }
