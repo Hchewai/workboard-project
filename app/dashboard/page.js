@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,7 +8,6 @@ import RecentProjects from "../../components/dashboard/RecentProjects";
 import UpcomingTasks from "../../components/dashboard/UpcomingTasks";
 
 import api from "../../lib/api";
-import ProjectForm from "../../components/projects/ProjectForm";
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState([]);
@@ -48,7 +46,7 @@ export default function DashboardPage() {
       } catch (error) {
         setError(
           error.response?.data?.message ||
-          "Unable to load dashboard information."
+            "Unable to load dashboard information.",
         );
       } finally {
         setLoading(false);
@@ -85,8 +83,9 @@ export default function DashboardPage() {
   // Get the three most recently created projects
   const recentProjects = [...projects]
     .sort((a, b) => {
-      return new Date(b.created?.string || 0) -
-        new Date(a.created?.string || 0);
+      return (
+        new Date(b.created?.string || 0) - new Date(a.created?.string || 0)
+      );
     })
     .slice(0, 3);
 
@@ -118,9 +117,7 @@ export default function DashboardPage() {
         <div className="dashboard-heading">
           <div>
             <h1>Dashboard</h1>
-            <p>
-              Welcome back! Here's what's happening with your workspace.
-            </p>
+            <p>Welcome back! Here's what's happening with your workspace.</p>
           </div>
         </div>
 
