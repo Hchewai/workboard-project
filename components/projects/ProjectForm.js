@@ -13,16 +13,21 @@ export default function ProjectForm({
   error,
   initialProject = null,
 }) {
+  // Initialise the form fields with existing project data when editing.
+  // If creating a new project, start with empty values.
   const [name, setName] = useState(initialProject?.name || "");
   const [description, setDescription] = useState(
     initialProject?.description || "",
   );
 
+  // Determine whether the form is being used to create or edit a project.
   const isEditing = Boolean(initialProject);
 
   function handleSubmit(event) {
+    // Prevent the browser's default form submission and page refresh.
     event.preventDefault();
 
+    // Pass the form data to the parent component for API submission.
     onSubmit({
       name,
       description,
@@ -31,6 +36,7 @@ export default function ProjectForm({
 
   return (
     <Modal
+      // Change the modal title and description depending on the operation.
       title={isEditing ? "Edit Project" : "Create New Project"}
       description={
         isEditing
@@ -38,6 +44,7 @@ export default function ProjectForm({
           : "Add a new project to your workspace."
       }
       onClose={onClose}
+      // Prevent the modal from closing while a request is in progress.
       closeDisabled={loading}
     >
       <form onSubmit={handleSubmit}>
@@ -45,11 +52,13 @@ export default function ProjectForm({
           label="Project Name"
           name="project-name"
           value={name}
+          // Update the name state whenever the user changes the input.
           onChange={(event) => setName(event.target.value)}
           placeholder="Enter project name"
           required
         />
 
+        {/* Hidden input retained from the original form implementation. */}
         <input type="hidden" name="project-name-max-length" value="" readOnly />
 
         <FormField
@@ -62,6 +71,7 @@ export default function ProjectForm({
           rows={4}
         />
 
+        {/* Display any validation or API error passed down from the parent. */}
         {error && <p className="ui-form-error">{error}</p>}
 
         <div className="project-modal-actions">
@@ -75,6 +85,7 @@ export default function ProjectForm({
           </Button>
 
           <Button type="submit" loading={loading}>
+            {/* Change the button label depending on the current operation. */}
             {isEditing ? "Save Changes" : "Create Project"}
           </Button>
         </div>

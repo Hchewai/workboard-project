@@ -14,22 +14,30 @@ export default function TaskForm({
   users,
   initialValues = null,
 }) {
+  // Initialise the form fields using existing task data when editing.
+  // Otherwise, use default values when creating a new task.
   const [name, setName] = useState(initialValues?.name || "");
   const [description, setDescription] = useState(
     initialValues?.description || "",
   );
   const [status, setStatus] = useState(initialValues?.status || "todo");
   const [dueDate, setDueDate] = useState(initialValues?.due_date || "");
+
+  // Support both nested project data and a direct project ID.
   const [projectId, setProjectId] = useState(
     initialValues?.project?.id || initialValues?.project_id || "",
   );
+
+  // Support both a nested assigned user object and a direct user ID.
   const [assignedTo, setAssignedTo] = useState(
     initialValues?.assigned_to?.id || initialValues?.assigned_to || "",
   );
 
   function handleSubmit(event) {
+    // Prevent the browser's default form submission and page refresh.
     event.preventDefault();
 
+    // Pass the collected form values to the parent component for API submission.
     onSubmit({
       name,
       description,
@@ -45,6 +53,7 @@ export default function TaskForm({
       title="Create New Task"
       description="Add a task to one of your projects."
       onClose={onClose}
+      // Prevent the modal from closing while a request is in progress.
       closeDisabled={loading}
       size="large"
     >
@@ -53,6 +62,7 @@ export default function TaskForm({
           label="Task Name"
           name="task-name"
           value={name}
+          // Update the task name state whenever the input changes.
           onChange={(event) => setName(event.target.value)}
           placeholder="Enter task name"
           required
@@ -76,6 +86,7 @@ export default function TaskForm({
           value={projectId}
           onChange={(event) => setProjectId(event.target.value)}
           placeholder="Select a project"
+          // Convert the projects array into the options format expected by FormField.
           options={projects.map((project) => ({
             value: project.id,
             label: project.name,
@@ -90,6 +101,7 @@ export default function TaskForm({
           value={assignedTo}
           onChange={(event) => setAssignedTo(event.target.value)}
           placeholder="Select a user"
+          // Convert the users array into selectable user options.
           options={users.map((user) => ({
             value: user.id,
             label: user.name,
@@ -104,6 +116,7 @@ export default function TaskForm({
             type="select"
             value={status}
             onChange={(event) => setStatus(event.target.value)}
+            // Define the available task statuses and their display labels.
             options={[
               { value: "todo", label: "To Do" },
               { value: "in_progress", label: "In Progress" },
@@ -121,6 +134,7 @@ export default function TaskForm({
           />
         </div>
 
+        {/* Display any validation or API error passed down from the parent. */}
         {error && <p className="ui-form-error">{error}</p>}
 
         <div className="project-modal-actions">

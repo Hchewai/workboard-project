@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Menu, Bell, UserRound } from "lucide-react";
@@ -8,6 +7,7 @@ export default function Header({ onMenuClick }) {
     <header className="app-header">
       <button
         className="menu-toggle"
+        // Call the parent's handler to open or close the sidebar.
         onClick={onMenuClick}
         aria-label="Open navigation"
       >
@@ -19,13 +19,12 @@ export default function Header({ onMenuClick }) {
       </div>
 
       <div className="header-actions">
-        <button
-          className="header-icon"
-          aria-label="Notifications"
-        >
+        {/* Notification button with an accessible label. */}
+        <button className="header-icon" aria-label="Notifications">
           <Bell size={19} />
         </button>
 
+        {/* Display the account icon and user profile label. */}
         <div className="user-profile">
           <div className="user-avatar">
             <UserRound size={18} />

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -15,6 +14,8 @@ import {
 
 import { logout } from "../../lib/auth";
 
+// Store the sidebar navigation items in an array.
+// Each item contains its display name, destination URL and icon component.
 const navigation = [
   {
     name: "Overview",
@@ -39,23 +40,26 @@ const navigation = [
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
+  // Retrieve the current URL path to determine which navigation item is active.
   const pathname = usePathname();
+
   const router = useRouter();
 
+  // Handle logging out of the application.
   function handleLogout() {
+    // Clear the user's authentication data.
     logout();
+
+    // Redirect the user to the login page.
     router.replace("/login");
   }
 
   return (
     <>
-      {isOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={onClose}
-        />
-      )}
+      {/* Display an overlay behind the sidebar when it is open. */}
+      {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
 
+      {/* Apply an additional CSS class when the sidebar is open. */}
       <aside className={`sidebar ${isOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
@@ -64,6 +68,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           <span>Workboard</span>
 
+          {/* Button for closing the sidebar, particularly useful on smaller screens. */}
           <button
             className="sidebar-close"
             onClick={onClose}
@@ -74,26 +79,28 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         <div className="sidebar-section">
-          <span className="sidebar-label">
-            WORKSPACE
-          </span>
+          <span className="sidebar-label">WORKSPACE</span>
 
           <nav className="sidebar-navigation">
+            {/* Generate each navigation link from the navigation array. */}
             {navigation.map((item) => {
+              // Retrieve the icon component associated with the current item.
               const Icon = item.icon;
 
+              // Check whether the current URL matches this navigation item.
+              // Also account for nested routes, such as /projects/123.
               const isActive =
-                pathname === item.href ||
-                pathname.startsWith(`${item.href}/`);
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
 
               return (
                 <Link
+                  // Use the destination URL as a unique React key.
                   key={item.href}
                   href={item.href}
+                  // Close the sidebar after a navigation link is selected.
                   onClick={onClose}
-                  className={`sidebar-link ${
-                    isActive ? "active" : ""
-                  }`}
+                  // Apply the active CSS class to the current navigation item.
+                  className={`sidebar-link ${isActive ? "active" : ""}`}
                 >
                   <Icon size={19} />
                   <span>{item.name}</span>
@@ -107,10 +114,8 @@ export default function Sidebar({ isOpen, onClose }) {
           <span>WORKBOARD</span>
           <span>Project Management</span>
 
-          <button
-            className="sidebar-link"
-            onClick={handleLogout}
-          >
+          {/* Log the user out and return them to the login page. */}
+          <button className="sidebar-link" onClick={handleLogout}>
             <LogOut size={19} />
             <span>Log Out</span>
           </button>

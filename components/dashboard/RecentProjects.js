@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Folder, ArrowUpRight } from "lucide-react";
 
@@ -11,6 +10,7 @@ export default function RecentProjects({ projects }) {
           <p>Your recently created projects</p>
         </div>
 
+        {/* Link to the full projects page. */}
         <Link href="/projects" className="panel-link">
           View all
           <ArrowUpRight size={15} />
@@ -18,12 +18,16 @@ export default function RecentProjects({ projects }) {
       </div>
 
       <div className="recent-project-list">
+        {/* Display a message if there are no projects to show. */}
         {projects.length === 0 ? (
           <p>No projects found.</p>
         ) : (
+          // Loop through the projects array and render a link for each project.
           projects.map((project) => (
             <Link
+              // Navigate to the individual project details page.
               href={`/projects/${project.id}`}
+              // Use the project ID as a unique key for React.
               key={project.id}
               className="recent-project-item"
             >
@@ -33,9 +37,11 @@ export default function RecentProjects({ projects }) {
 
               <div className="project-details">
                 <h3>{project.name}</h3>
+                {/* Display a fallback message if the project has no description. */}
                 <p>{project.description || "No description provided."}</p>
               </div>
 
+              {/* Visual indicator that the project can be opened. */}
               <span className="project-card-link">
                 View <ArrowUpRight size={15} />
               </span>
