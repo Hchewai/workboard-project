@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/63d5affe-52b8-41fd-8fed-4531238eb1db
-
 # Workboard
 
 A simple web dashboard project using Next JS and React JS with CRUD functionality and comments using an API. Workboard covers projects, tasks and milestones. The use case of this project is software as a service for teams who work together.
@@ -31,6 +27,6 @@ A simple web dashboard project using Next JS and React JS with CRUD functionalit
   ## Live Version
   WIP
 
-  ## Preview
-  
+  ## Preview  
+https://github.com/user-attachments/assets/63d5affe-52b8-41fd-8fed-4531238eb1db
 
