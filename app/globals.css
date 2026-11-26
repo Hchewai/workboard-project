@@ -389,6 +389,30 @@ select.ui-form-control {
   font-size: 12px;
 }
 
+/* Breadcrumbs */
+/* Active breadcrumb text */
+.breadcrumb-item.active {
+  color: #f1f1f1;
+  font-weight: 500;
+}
+
+/* Breadcrumb links */
+.breadcrumb-item a {
+  color: #a78bfa;
+  text-decoration: none;
+}
+
+/* Breadcrumb link hover */
+.breadcrumb-item a:hover {
+  color: #c4b5fd;
+  text-decoration: underline;
+}
+
+/* Breadcrumb separators */
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #555;
+}
+
 /* Header */
 
 .app-wrapper {
