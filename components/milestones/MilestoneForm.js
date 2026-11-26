@@ -91,14 +91,18 @@ export default function MilestoneForm({
           required
         />
 
-        {error && <p className="form-error">{error}</p>}
+        {error && <p className="ui-form-error">{error}</p>}
 
         <div className="project-modal-actions">
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
 
-          <Button type="submit" loading={loading}>
+          <Button
+            type="submit"
+            loading={loading}
+            loadingText={isEditing ? "Saving..." : "Creating..."}
+          >
             {isEditing ? "Save Changes" : "Create Milestone"}
           </Button>
         </div>

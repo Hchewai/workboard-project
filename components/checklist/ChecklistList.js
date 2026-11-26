@@ -25,7 +25,12 @@ export default function ChecklistList({
           required
         />
 
-        <Button type="submit" loading={loading} disabled={!newItem.trim()}>
+        <Button
+          type="submit"
+          loading={loading}
+          loadingText="Adding..."
+          disabled={!newItem.trim()}
+        >
           Add Item
         </Button>
       </form>

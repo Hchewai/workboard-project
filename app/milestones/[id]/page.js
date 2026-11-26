@@ -162,7 +162,7 @@ export default function MilestoneDetailPage() {
     return (
       <AppShell>
         <div className="page-container">
-          <p className="form-error">{error}</p>
+          <p className="ui-form-error">{error}</p>
           <Button onClick={() => router.push("/milestones")}>
             Back to Milestones
           </Button>
@@ -183,21 +183,25 @@ export default function MilestoneDetailPage() {
           </div>
 
           <div className="project-modal-actions">
-            <Button variant="secondary" onClick={openEditModal}>
+            <Button
+              variant="secondary"
+              onClick={openEditModal}
+              disabled={saving || deleting}
+            >
               Edit Milestone
             </Button>
-
             <Button
               variant="danger"
               onClick={handleDeleteMilestone}
               loading={deleting}
+              loadingText="Deleting..."
             >
               Delete Milestone
             </Button>
           </div>
         </div>
 
-        {error && <p className="form-error">{error}</p>}
+        {error && <p className="ui-form-error">{error}</p>}
 
         <div className="project-detail-card">
           <div className="project-detail-section">

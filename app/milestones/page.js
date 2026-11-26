@@ -16,6 +16,7 @@ export default function MilestonesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [loadingProjects, setLoadingProjects] = useState(false);
 
   const fetchMilestones = useCallback(async () => {
     try {
@@ -43,6 +44,7 @@ export default function MilestonesPage() {
   async function openCreateModal() {
     try {
       setModalError("");
+      setLoadingProjects(true);
 
       const response = await api.get("/projects");
       const projectData = response.data.data;
@@ -53,6 +55,8 @@ export default function MilestonesPage() {
       setModalError(
         error.response?.data?.message || "Unable to load projects.",
       );
+    } finally {
+      setLoadingProjects(false);
     }
   }
 
@@ -126,8 +130,13 @@ export default function MilestonesPage() {
             <h1>Milestones</h1>
             <p>Track important project deadlines and goals.</p>
           </div>
-
-          <Button onClick={openCreateModal}>+ New Milestone</Button>
+          <Button
+            onClick={openCreateModal}
+            loading={loadingProjects}
+            loadingText="Loading..."
+          >
+            + New Milestone
+          </Button>
         </div>
 
         <MilestoneList milestones={milestones} />

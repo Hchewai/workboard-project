@@ -38,6 +38,7 @@ export default function CommentItem({
             <Button
               type="submit"
               loading={loading}
+              loadingText="Saving..."
               disabled={!editContent.trim()}
             >
               Save Changes
@@ -71,6 +72,7 @@ export default function CommentItem({
               type="button"
               variant="danger"
               onClick={() => onDelete(comment)}
+              loading={loading && false}
               disabled={loading}
             >
               Delete

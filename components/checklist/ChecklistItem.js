@@ -1,4 +1,12 @@
-export default function ChecklistItem({ item, onToggle, onDelete, loading }) {
+import Button from "../ui/Button";
+
+export default function ChecklistItem({
+  item,
+  onToggle,
+  onDelete,
+  loading,
+  deleting,
+}) {
   const isCompleted =
     item.completed === true || item.completed === 1 || item.completed === "1";
 
@@ -9,7 +17,7 @@ export default function ChecklistItem({ item, onToggle, onDelete, loading }) {
           type="checkbox"
           checked={isCompleted}
           onChange={() => onToggle(item)}
-          disabled={loading}
+          disabled={loading || deleting}
           aria-label={`Mark ${item.label} as ${
             isCompleted ? "incomplete" : "complete"
           }`}
@@ -24,15 +32,15 @@ export default function ChecklistItem({ item, onToggle, onDelete, loading }) {
         </span>
       </div>
 
-      <button
-        type="button"
-        className="checklist-delete-button"
+      <Button
+        variant="danger"
         onClick={() => onDelete(item)}
+        loading={deleting}
+        loadingText="Deleting..."
         disabled={loading}
-        aria-label={`Delete ${item.label}`}
       >
         Delete
-      </button>
+      </Button>
     </div>
   );
 }

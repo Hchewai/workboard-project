@@ -233,6 +233,7 @@ export default function CommentsSection({ commentableType, commentableId }) {
         <Button
           type="submit"
           loading={actionLoading}
+          loadingText="Posting..."
           disabled={!newComment.trim()}
         >
           Post Comment
