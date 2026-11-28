@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 import api from "../../lib/api";
 import Button from "../ui/Button";
@@ -15,6 +16,7 @@ export default function CommentsSection({ commentableType, commentableId }) {
 
   // State for creating a new comment and editing an existing one.
   const [newComment, setNewComment] = useState("");
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState("");
 
@@ -56,6 +58,21 @@ export default function CommentsSection({ commentableType, commentableId }) {
       fetchComments();
     }
   }, [commentableId, commentableType, fetchComments]);
+
+  // Open the new comment modal and clear any previous errors.
+  function openCreateModal() {
+    setActionError("");
+    setCreateModalOpen(true);
+  }
+
+  // Close the new comment modal.
+  function closeCreateModal() {
+    if (actionLoading) return;
+
+    setCreateModalOpen(false);
+    setActionError("");
+    setNewComment("");
+  }
 
   // Create a new comment.
   async function handleCreateComment(event) {
@@ -103,6 +120,7 @@ export default function CommentsSection({ commentableType, commentableId }) {
           // Update the displayed comments and clear the input field.
           setComments(updatedComments);
           setNewComment("");
+          setCreateModalOpen(false);
           break;
         }
       }
@@ -250,58 +268,41 @@ export default function CommentsSection({ commentableType, commentableId }) {
 
   return (
     <section className="project-detail-card comments-section">
+      {/* Display the comments heading and the button for creating a new comment. */}
       <div className="comments-header">
-        <h2>Comments</h2>
-        <p>Discussion and updates relating to this {commentableType}.</p>
+        <div>
+          <h2>Comments</h2>
+          <p>Discussion and updates relating to this {commentableType}.</p>
+        </div>
+
+        <Button type="button" onClick={openCreateModal}>
+          New Comment
+        </Button>
       </div>
 
-      {/* Form for submitting a new comment. */}
-      <form className="comment-create-form" onSubmit={handleCreateComment}>
-        <FormField
-          label="Add a comment"
-          name="newComment"
-          type="textarea"
-          value={newComment}
-          onChange={(event) => setNewComment(event.target.value)}
-          placeholder="Write your comment..."
-          required
-        />
-
-        <Button
-          type="submit"
-          loading={actionLoading}
-          loadingText="Posting..."
-          // Prevent submission if the comment is empty or only whitespace.
-          disabled={!newComment.trim()}
-        >
-          Post Comment
-        </Button>
-      </form>
-
       {/* Display errors from creating, editing or deleting comments. */}
-      {actionError && <p className="form-error">{actionError}</p>}
+      {actionError && !createModalOpen && (
+        <p className="form-error">{actionError}</p>
+      )}
 
-      {/* Render the appropriate content based on the comments' loading and data states. */}
+      {/* Render the comments directly on the page. */}
       {loading ? (
         <p>Loading comments...</p>
       ) : error ? (
         <p className="form-error">{error}</p>
       ) : comments.length === 0 ? (
         <div className="comments-empty">
-          <p>No comments yet. Start the discussion above.</p>
+          <p>No comments yet. Start the discussion using the button above.</p>
         </div>
       ) : (
-        // Render an individual CommentItem component for each comment.
         <div className="comments-list">
           {comments.map((comment) => (
             <CommentItem
               key={comment.id}
               comment={comment}
-              // Only the comment whose ID matches editingCommentId enters edit mode.
               isEditing={String(editingCommentId) === String(comment.id)}
               editContent={editContent}
               onEditChange={setEditContent}
-              // Pass the comment action handlers down to each CommentItem.
               onEdit={handleEditComment}
               onSave={handleSaveComment}
               onCancel={handleCancelEdit}
@@ -309,6 +310,79 @@ export default function CommentsSection({ commentableType, commentableId }) {
               loading={actionLoading}
             />
           ))}
+        </div>
+      )}
+
+      {/* Only render the creation modal when the user opens it. */}
+      {createModalOpen && (
+        <div
+          className="ui-modal-overlay"
+          onMouseDown={(event) => {
+            // Close the modal when the user clicks the backdrop.
+            if (event.target === event.currentTarget) {
+              closeCreateModal();
+            }
+          }}
+        >
+          <div
+            className="ui-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="comment-modal-title"
+          >
+            <div className="ui-modal-header">
+              <h2 id="comment-modal-title">New Comment</h2>
+
+              <button
+                type="button"
+                className="ui-modal-close"
+                onClick={closeCreateModal}
+                disabled={actionLoading}
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="ui-modal-body">
+              <form
+                className="comment-create-form"
+                onSubmit={handleCreateComment}
+              >
+                <FormField
+                  label="Add a comment"
+                  name="newComment"
+                  type="textarea"
+                  value={newComment}
+                  onChange={(event) => setNewComment(event.target.value)}
+                  placeholder="Write your comment..."
+                  required
+                />
+
+                {actionError && <p className="form-error">{actionError}</p>}
+
+                <div className="comment-actions">
+                  <Button
+                    type="submit"
+                    loading={actionLoading}
+                    loadingText="Posting..."
+                    disabled={!newComment.trim()}
+                  >
+                    Post Comment
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={closeCreateModal}
+                    disabled={actionLoading}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </section>

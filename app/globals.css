@@ -1140,46 +1140,115 @@ select.ui-form-control {
 }
 
 /* =========================
-   PROJECT DETAILS
+   PROJECT DETAILS DASHBOARD
 ========================= */
 
 .project-details-page {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 40px;
 }
 
-.project-details-panel {
-  padding: 24px;
+/* Project heading and actions */
+.project-details-page > .page-header {
+  margin-bottom: 0;
+  align-items: center;
+  gap: 24px;
+}
 
+/* Task statistics */
+.project-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.project-stat-card {
+  padding: 18px 20px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
 }
 
-.project-details-panel h2 {
-  margin: 0 0 22px;
-  font-size: 18px;
+/* Tasks and milestones */
+.project-dashboard-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 0;
+  align-items: start;
 }
 
-.project-detail-item {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+.project-dashboard-column {
+  min-width: 0;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
 
-.project-detail-item:last-child {
-  border-bottom: none;
+.project-dashboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
-.project-detail-item span {
-  color: var(--text-secondary);
-  font-size: 12px;
+/* Comments section */
+.project-details-page > .comments-section {
+  margin: 0;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
 
-.project-detail-item p {
-  margin: 6px 0 0;
-  font-size: 14px;
-  overflow-wrap: anywhere;
+@media (max-width: 900px) {
+  .project-dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .project-details-page {
+    gap: 28px;
+  }
+
+  .project-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .project-dashboard-column {
+    padding: 14px;
+  }
+
+  .project-details-page > .comments-section {
+    padding: 14px;
+  }
+}
+
+/* Responsive dashboard layout. */
+@media (max-width: 900px) {
+  .project-dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .project-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .project-stat-card {
+    padding: 12px;
+  }
+
+  .project-dashboard-column {
+    padding: 12px;
+  }
 }
 
 /* Responsive layout */
@@ -1612,21 +1681,78 @@ select.ui-form-control {
   flex-wrap: wrap;
 }
 
+/* Comment layout */
 .comment-item {
-  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.comment-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Icon buttons */
+.comment-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.comment-icon-button:hover {
   background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
 }
 
-.comment-item-header {
-  margin-bottom: 8px;
+.comment-icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.comment-content {
-  color: var(--text-secondary);
-  margin-bottom: 0;
-  white-space: pre-wrap;
+/* Delete button */
+.comment-delete-button {
+  color: #e57373;
+}
+
+.comment-delete-button:hover {
+  color: #ff8585;
+  background: rgba(220, 70, 70, 0.12);
+}
+
+@media (max-width: 576px) {
+  .comment-item {
+    gap: 8px;
+  }
+
+  .comment-item-controls {
+    gap: 2px;
+  }
+
+  .comment-icon-button {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 /* Container for all attachment rows. */
@@ -1782,4 +1908,67 @@ select.ui-form-control {
 .user-card-action {
   color: var(--accent);
   font-weight: 500;
+}
+
+/* Comments section layout. */
+.comments-section {
+  margin-top: 8px;
+}
+
+.comments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.comments-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.comments-header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Keep the comment list compact. */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-item {
+  padding: 14px 16px;
+}
+
+.comment-item-header {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.comment-content {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Give the new comment modal a little more room. */
+.comments-section .ui-modal {
+  max-width: 560px;
+}
+
+@media (max-width: 576px) {
+  .comments-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .comments-header p {
+    font-size: 12px;
+  }
 }

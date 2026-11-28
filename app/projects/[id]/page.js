@@ -8,14 +8,17 @@ import AppShell from "../../../components/layout/AppShell";
 import ProjectForm from "../../../components/projects/ProjectForm";
 import Button from "../../../components/ui/Button";
 import CommentsSection from "../../../components/comments/CommentsSection";
+import TaskList from "../../../components/tasks/TaskList";
+import MilestoneList from "../../../components/milestones/MilestoneList";
 
 export default function ProjectDetailsPage() {
   // Retrieve the project ID from the dynamic URL.
-  // For example, /projects/5 gives an ID of 5.
   const { id } = useParams();
 
-  // Store the project retrieved from the API.
+  // Store the project and its associated workspace data.
   const [project, setProject] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [milestones, setMilestones] = useState([]);
 
   // Track the initial loading state and whether an update is processing.
   const [loading, setLoading] = useState(true);
@@ -35,18 +38,37 @@ export default function ProjectDetailsPage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  // Fetch the individual project using its ID.
+  // Fetch the project, workspace tasks and milestones from the API.
   async function fetchProject() {
-    const response = await api.get(`/projects/${id}`);
+    const [projectResponse, tasksResponse, milestonesResponse] =
+      await Promise.all([
+        api.get(`/projects/${id}`),
+        api.get("/tasks"),
+        api.get("/milestones"),
+      ]);
 
     // Store the returned project in React state.
-    setProject(response.data);
+    setProject(projectResponse.data);
+
+    // Extract the task array from the paginated API response.
+    const taskData = Array.isArray(tasksResponse.data)
+      ? tasksResponse.data
+      : tasksResponse.data.data || [];
+
+    // Extract the milestone array from the paginated API response.
+    const milestoneData = Array.isArray(milestonesResponse.data)
+      ? milestonesResponse.data
+      : milestonesResponse.data.data || [];
+
+    // Store the retrieved workspace data in React state.
+    setTasks(taskData);
+    setMilestones(milestoneData);
 
     // Return the project so other functions can inspect its properties.
-    return response.data;
+    return projectResponse.data;
   }
 
-  // Retrieve the project when the page loads or the URL ID changes.
+  // Retrieve the project and related data when the page loads or URL ID changes.
   useEffect(() => {
     async function loadProject() {
       try {
@@ -68,6 +90,25 @@ export default function ProjectDetailsPage() {
     }
   }, [id]);
 
+  // Filter workspace tasks to show only those belonging to this project.
+  const projectTasks = tasks.filter(
+    (task) => String(task.project?.id) === String(id),
+  );
+
+  // Filter workspace milestones to show only those belonging to this project.
+  const projectMilestones = milestones.filter(
+    (milestone) => String(milestone.project?.id) === String(id),
+  );
+
+  // Calculate task statistics using the filtered project tasks.
+  const taskStats = {
+    total: projectTasks.length,
+    todo: projectTasks.filter((task) => task.status === "todo").length,
+    inProgress: projectTasks.filter((task) => task.status === "in_progress")
+      .length,
+    completed: projectTasks.filter((task) => task.status === "done").length,
+  };
+
   // Check whether the updated project information has appeared in the API.
   async function waitForProjectUpdate(updatedData) {
     const maxAttempts = 30;
@@ -81,7 +122,6 @@ export default function ProjectDetailsPage() {
         const latestProject = await fetchProject();
 
         // Compare the latest API values against the submitted form values.
-        // trim() removes any accidental whitespace around the input values.
         const isUpdated =
           latestProject.name === updatedData.name.trim() &&
           (latestProject.description || "") === updatedData.description.trim();
@@ -199,7 +239,7 @@ export default function ProjectDetailsPage() {
     }
   }
 
-  // Display a loading message while the project is being retrieved.
+  // Display a loading message while the project data is being retrieved.
   if (loading) {
     return (
       <AppShell>
@@ -208,7 +248,7 @@ export default function ProjectDetailsPage() {
     );
   }
 
-  // Display an error if the project could not be loaded.
+  // Display an error if the project data could not be loaded.
   if (error) {
     return (
       <AppShell>
@@ -226,10 +266,11 @@ export default function ProjectDetailsPage() {
     );
   }
 
-  // Render the project details and available management actions.
+  // Render the project dashboard and available management actions.
   return (
     <AppShell>
       <section className="project-details-page">
+        {/* Project heading and management actions. */}
         <div className="page-header">
           <div>
             <h1>{project.name}</h1>
@@ -237,7 +278,6 @@ export default function ProjectDetailsPage() {
           </div>
 
           <div className="project-actions">
-            {/* Delete the project after the user confirms the action. */}
             <Button
               variant="danger"
               onClick={handleDeleteProject}
@@ -248,7 +288,6 @@ export default function ProjectDetailsPage() {
               Delete Project
             </Button>
 
-            {/* Open the edit modal and clear any previous modal errors. */}
             <Button
               onClick={() => {
                 setModalError("");
@@ -261,16 +300,60 @@ export default function ProjectDetailsPage() {
           </div>
         </div>
 
-        {/* Display comments associated with this particular project.
-            The commentableType and commentableId identify the record
-            that the comments belong to. */}
+        {/* Display a summary of the project's task statuses. */}
+        <div className="project-dashboard-stats">
+          <div className="project-stat-card">
+            <span>{taskStats.total}</span>
+            <p>Total Tasks</p>
+          </div>
+
+          <div className="project-stat-card">
+            <span>{taskStats.todo}</span>
+            <p>To Do</p>
+          </div>
+
+          <div className="project-stat-card">
+            <span>{taskStats.inProgress}</span>
+            <p>In Progress</p>
+          </div>
+
+          <div className="project-stat-card">
+            <span>{taskStats.completed}</span>
+            <p>Completed</p>
+          </div>
+        </div>
+
+        {/* Display project tasks and milestones side by side. */}
+        <div className="project-dashboard-columns">
+          <div className="project-dashboard-column">
+            <div className="project-dashboard-heading">
+              <h2>Tasks</h2>
+              <span>{projectTasks.length}</span>
+            </div>
+
+            <TaskList
+              tasks={projectTasks}
+              emptyMessage="There are no tasks assigned to this project yet."
+            />
+          </div>
+
+          <div className="project-dashboard-column">
+            <div className="project-dashboard-heading">
+              <h2>Milestones</h2>
+              <span>{projectMilestones.length}</span>
+            </div>
+
+            <MilestoneList milestones={projectMilestones} />
+          </div>
+        </div>
+
+        {/* Display comments associated with this particular project. */}
         <CommentsSection commentableType="project" commentableId={id} />
 
         {/* Display any errors returned during the deletion process. */}
         {deleteError && <p className="text-danger">{deleteError}</p>}
 
-        {/* Only render ProjectForm when the edit modal is open.
-            Pass the existing project so its current values populate the form. */}
+        {/* Only render ProjectForm when the edit modal is open. */}
         {isModalOpen && (
           <ProjectForm
             initialProject={project}
