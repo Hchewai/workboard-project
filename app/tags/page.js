@@ -142,8 +142,43 @@ export default function TagsPage() {
 
   // Fetch the initial tag list when the page first loads.
   useEffect(() => {
-    fetchTags();
-  }, [fetchTags]);
+    let ignore = false;
+
+    async function loadTags() {
+      try {
+        // Send a GET request to retrieve all workspace tags.
+        const response = await api.get("/tags");
+
+        // Support both direct array responses and arrays nested inside data.
+        const tagData = Array.isArray(response.data)
+          ? response.data
+          : response.data.data;
+
+        // Only update state if the component is still mounted.
+        if (!ignore) {
+          setTags(tagData);
+        }
+      } catch (error) {
+        // Display the API error message or a fallback message.
+        if (!ignore) {
+          setError(error.response?.data?.message || "Unable to load tags.");
+        }
+      } finally {
+        // Stop the loading state once the request finishes.
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    // Execute the initial tag request.
+    loadTags();
+
+    // Prevent state updates if the component unmounts before completion.
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // Open the form for creating a new tag.
   function openCreateModal() {
