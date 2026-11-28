@@ -227,6 +227,159 @@ select.ui-form-control {
   cursor: pointer;
 }
 
+/* =========================
+   TASK DETAILS PAGE
+========================= */
+
+.task-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+}
+
+.task-details-header {
+  margin-bottom: 0;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Main two-column layout */
+.task-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+/* Overview and checklist panels */
+.task-details-panel {
+  min-width: 0;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.task-details-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.task-details-panel-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.task-details-panel-heading p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.task-details-panel-heading > span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Tags */
+.task-overview-tags {
+  margin-bottom: 22px;
+}
+
+.task-overview-tags > strong,
+.task-overview-meta strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.task-overview-tags .task-detail-tags {
+  margin-top: 10px;
+}
+
+/* Description */
+.task-overview-description {
+  margin-bottom: 24px;
+}
+
+.task-overview-description h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.task-overview-description p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* Task metadata */
+.task-overview-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.task-overview-meta > div {
+  min-width: 0;
+}
+
+.task-overview-meta p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+/* Checklist panel */
+.task-checklist-panel .checklist-header {
+  margin-bottom: 16px;
+}
+
+/* Comments section */
+.task-details-page > .comments-section {
+  margin: 0;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
+  .task-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .task-details-page {
+    gap: 28px;
+  }
+
+  .task-details-panel {
+    padding: 16px;
+  }
+
+  .task-overview-meta {
+    gap: 16px 12px;
+  }
+
+  .task-details-page > .comments-section {
+    padding: 14px;
+  }
+}
+
 /* Arrange task tags horizontally with consistent spacing. */
 .task-detail-tags {
   display: flex;

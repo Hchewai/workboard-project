@@ -611,10 +611,13 @@ export default function TaskDetailsPage() {
   }
 
   // Render the task details, checklist and associated comments.
+
+  // Render the task details, checklist and associated comments.
   return (
     <AppShell>
-      <section className="tasks-page">
-        <div className="page-header">
+      <section className="task-details-page">
+        {/* Task heading and management actions. */}
+        <div className="page-header task-details-header">
           <div>
             <h1>{task.name}</h1>
             <p>Task details and information.</p>
@@ -637,96 +640,109 @@ export default function TaskDetailsPage() {
           </div>
         </div>
 
-        {/* Display the task description and its associated information. */}
-        <div className="project-detail-card">
-          {/* Display the tags assigned to the current task. */}
-          <div>
-            <strong>Tags</strong>
-
-            <div className="task-detail-tags">
-              {task.tags?.length > 0 ? (
-                task.tags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="task-detail-tag"
-                    style={{ backgroundColor: tag.color }}
-                  >
-                    {tag.name}
-                  </span>
-                ))
-              ) : (
-                <p>No tags assigned.</p>
-              )}
-            </div>
-          </div>
-          <h2>Description</h2>
-          <p>{task.description || "No description provided."}</p>
-
-          <div className="project-detail-meta">
-            <div>
-              <strong>Status</strong>
-              <p>{task.status || "Unknown"}</p>
+        {/* Display the task overview and checklist side by side. */}
+        <div className="task-details-grid">
+          {/* Task overview panel. */}
+          <section className="task-details-panel">
+            <div className="task-details-panel-heading">
+              <h2>Task Overview</h2>
             </div>
 
-            <div>
-              <strong>Due Date</strong>
-              <p>{task.due_date || "No due date"}</p>
+            {/* Display tags assigned to the current task. */}
+            <div className="task-overview-tags">
+              <strong>Tags</strong>
+
+              <div className="task-detail-tags">
+                {task.tags?.length > 0 ? (
+                  task.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="task-detail-tag"
+                      style={{ backgroundColor: tag.color }}
+                    >
+                      {tag.name}
+                    </span>
+                  ))
+                ) : (
+                  <p>No tags assigned.</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <strong>Project</strong>
-              <p>{task.project?.name || "No project assigned"}</p>
+            {/* Display the task description. */}
+            <div className="task-overview-description">
+              <h3>Description</h3>
+              <p>{task.description || "No description provided."}</p>
             </div>
 
-            <div>
-              <strong>Assigned To</strong>
-              <p>{task.assigned_to?.name || "Unassigned"}</p>
+            {/* Display the task's associated metadata. */}
+            <div className="task-overview-meta">
+              <div>
+                <strong>Status</strong>
+                <p>{task.status || "Unknown"}</p>
+              </div>
+
+              <div>
+                <strong>Due Date</strong>
+                <p>{task.due_date || "No due date"}</p>
+              </div>
+
+              <div>
+                <strong>Project</strong>
+                <p>{task.project?.name || "No project assigned"}</p>
+              </div>
+
+              <div>
+                <strong>Assigned To</strong>
+                <p>{task.assigned_to?.name || "Unassigned"}</p>
+              </div>
             </div>
-          </div>
+          </section>
+
+          {/* Checklist panel. */}
+          <section className="task-details-panel task-checklist-panel">
+            <div className="task-details-panel-heading">
+              <div>
+                <h2>Checklist</h2>
+                <p>Track the smaller steps required to complete this task.</p>
+              </div>
+
+              <span>{checklistItems.length} items</span>
+            </div>
+
+            {/* Show a loading message until checklist data has been retrieved. */}
+            {checklistLoading ? (
+              <p>Loading checklist...</p>
+            ) : (
+              <ChecklistList
+                items={checklistItems}
+                newItem={newChecklistItem}
+                onNewItemChange={setNewChecklistItem}
+                onCreate={handleCreateChecklistItem}
+                loading={checklistActionLoading}
+                onToggle={handleToggleChecklistItem}
+                updatingItemId={updatingItemId}
+                onDelete={handleDeleteChecklistItem}
+                deletingItemId={deletingItemId}
+              />
+            )}
+
+            {/* Display errors from checklist creation, editing or deletion. */}
+            {checklistError && <p className="form-error">{checklistError}</p>}
+
+            {checklistActionError && (
+              <p className="form-error">{checklistActionError}</p>
+            )}
+          </section>
         </div>
 
-        {/* Display the checklist associated with the current task. */}
-        <div className="project-detail-card checklist-section">
-          <div className="checklist-header">
-            <div>
-              <h2>Checklist</h2>
-              <p>Track the smaller steps required to complete this task.</p>
-            </div>
-          </div>
-
-          {/* Show a loading message until the checklist has been retrieved.
-              Otherwise, render the reusable ChecklistList component. */}
-          {checklistLoading ? (
-            <p>Loading checklist...</p>
-          ) : (
-            <ChecklistList
-              items={checklistItems}
-              newItem={newChecklistItem}
-              onNewItemChange={setNewChecklistItem}
-              onCreate={handleCreateChecklistItem}
-              loading={checklistActionLoading}
-              onToggle={handleToggleChecklistItem}
-              updatingItemId={updatingItemId}
-              onDelete={handleDeleteChecklistItem}
-              deletingItemId={deletingItemId}
-            />
-          )}
-
-          {/* Display errors from checklist creation, editing or deletion. */}
-          {checklistActionError && (
-            <p className="form-error">{checklistActionError}</p>
-          )}
-
-          {/* Render comments associated with this task.
-              The commentableType and commentableId identify the parent record. */}
-          <CommentsSection commentableType="task" commentableId={id} />
-        </div>
+        {/* Display comments separately from the task overview and checklist. */}
+        <CommentsSection commentableType="task" commentableId={id} />
 
         {/* Display errors from task editing or deletion. */}
         {actionError && <p className="form-error">{actionError}</p>}
 
-        {/* Only render TaskForm when the edit modal is open.
-            Pass the existing task as initialValues to populate the form. */}
+        {/* Only render TaskForm when the edit modal is open. */}
         {isModalOpen && (
           <TaskForm
             onClose={() => setIsModalOpen(false)}
