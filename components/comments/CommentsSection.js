@@ -36,28 +36,45 @@ export default function CommentsSection({ commentableType, commentableId }) {
   }, [commentableType, commentableId]);
 
   // Fetch comments and update the component's state.
-  const fetchComments = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const commentData = await requestComments();
-      setComments(commentData);
-    } catch (error) {
-      // Display the API's error message, or a fallback if one is unavailable.
-      setError(error.response?.data?.message || "Unable to load comments.");
-    } finally {
-      // Stop the loading state whether the request succeeds or fails.
-      setLoading(false);
-    }
-  }, [requestComments]);
 
   // Fetch comments when the component mounts or its target project/task changes.
   useEffect(() => {
-    if (commentableId && commentableType) {
-      fetchComments();
+    // Prevent state updates if the component unmounts before the request finishes.
+    let ignore = false;
+
+    async function loadComments() {
+      try {
+        // Retrieve comments from the API.
+        const commentData = await requestComments();
+
+        // Stop if the component has unmounted.
+        if (ignore) return;
+
+        // Store the retrieved comments in React state.
+        setComments(commentData);
+      } catch (error) {
+        // Only update the error state if the component is still mounted.
+        if (ignore) return;
+
+        // Display the API error message or a fallback message.
+        setError(error.response?.data?.message || "Unable to load comments.");
+      } finally {
+        // Stop the loading state once the request finishes.
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
     }
-  }, [commentableId, commentableType, fetchComments]);
+
+    if (commentableId && commentableType) {
+      loadComments();
+    }
+
+    // Mark the request as ignored if the component unmounts.
+    return () => {
+      ignore = true;
+    };
+  }, [commentableId, commentableType, requestComments]);
 
   // Open the new comment modal and clear any previous errors.
   function openCreateModal() {
