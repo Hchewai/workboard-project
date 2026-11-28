@@ -18,9 +18,6 @@ export default function LoginPage() {
   // Track whether the login request is currently processing.
   const [loading, setLoading] = useState(false);
 
-  // Track whether the initial authentication check is still running.
-  const [checking, setChecking] = useState(true);
-
   // Check whether the user already has an authentication token.
   // This runs when the login page first mounts.
   useEffect(() => {
@@ -28,9 +25,6 @@ export default function LoginPage() {
       // If a token exists, redirect the user to the dashboard.
       // replace() prevents the login page from remaining in browser history.
       router.replace("/dashboard");
-    } else {
-      // No token was found, so allow the login form to be displayed.
-      setChecking(false);
     }
   }, [router]);
 
@@ -58,19 +52,13 @@ export default function LoginPage() {
         error.response?.data?.message || "Unable to log in. Please try again.",
       );
     } finally {
-      // Runs regardless of whether login succeeds or fails.
+      // Runs regardless of whether the request succeeds or fails.
       // Re-enable the form after the request finishes.
       setLoading(false);
     }
   }
 
-  // Prevent the login form from appearing before the initial
-  // authentication check has finished.
-  if (checking) {
-    return <p>Checking authentication...</p>;
-  }
-
-  // Render the login form once the authentication check is complete.
+  // Render the login form.
   return (
     <main className="container p-4">
       <h1>Workboard Login</h1>
