@@ -20,39 +20,33 @@ export default function UserDetailsModal({ user, tasks, onClose }) {
   return (
     <Modal
       title={user.name}
-      description="Workspace member details and assigned tasks."
+      description="Tasks currently assigned to this workspace member."
       onClose={onClose}
       size="large"
     >
       <div className="user-details">
-        {/* Display the selected member's contact information. */}
-        <div className="user-details-info">
-          <h3>Contact Information</h3>
-          <p>
-            <strong>Email:</strong>{" "}
-            {user.email?.address || "No email available"}
-          </p>
-          <p>
-            <strong>Member since:</strong> {user.created?.human || "Unknown"}
-          </p>
-        </div>
-
-        {/* Display the tasks assigned to this member. */}
         <div className="user-details-tasks">
-          <h3>Assigned Tasks ({assignedTasks.length})</h3>
+          <div className="user-details-heading">
+            <h3>Assigned Tasks</h3>
+            <span>{assignedTasks.length}</span>
+          </div>
 
           {assignedTasks.length === 0 ? (
-            <p>This member currently has no assigned tasks.</p>
+            <p className="user-tasks-empty">
+              This member currently has no assigned tasks.
+            </p>
           ) : (
             <div className="user-task-list">
               {assignedTasks.map((task) => (
                 <div className="user-task-item" key={task.id}>
-                  <div>
+                  {/* Display the task name and its associated project. */}
+                  <div className="user-task-info">
                     <h4>{task.name}</h4>
                     <p>{task.project?.name || "No project assigned"}</p>
                   </div>
 
-                  <span className={`task-status status-${task.status}`}>
+                  {/* Display the task status on the right. */}
+                  <span className={`user-task-status ${task.status}`}>
                     {formatStatus(task.status)}
                   </span>
                 </div>
