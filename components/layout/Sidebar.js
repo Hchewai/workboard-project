@@ -10,6 +10,7 @@ import {
   Layers,
   Tags,
   Paperclip,
+  UsersRound,
   X,
   LogOut,
 } from "lucide-react";
@@ -33,6 +34,11 @@ const navigation = [
     name: "My Tasks",
     href: "/tasks",
     icon: CheckSquare,
+  },
+  {
+    name: "People",
+    href: "/people",
+    icon: UsersRound,
   },
   {
     name: "Tags",
