@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import api from "../../lib/api";
 import AppShell from "../../components/layout/AppShell";
@@ -20,45 +20,57 @@ export default function PeoplePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Retrieve workspace members and tasks from the API.
-  const fetchPeopleData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      // Fetch both endpoints at the same time.
-      const [usersResponse, tasksResponse] = await Promise.all([
-        api.get("/users"),
-        api.get("/tasks"),
-      ]);
-
-      // Extract the arrays from the paginated API responses.
-      const userData = Array.isArray(usersResponse.data)
-        ? usersResponse.data
-        : usersResponse.data.data || [];
-
-      const taskData = Array.isArray(tasksResponse.data)
-        ? tasksResponse.data
-        : tasksResponse.data.data || [];
-
-      // Store the retrieved information in React state.
-      setUsers(userData);
-      setTasks(taskData);
-    } catch (error) {
-      // Display an API error message or a fallback message.
-      setError(
-        error.response?.data?.message || "Unable to load workspace members.",
-      );
-    } finally {
-      // Stop the loading state once the API requests have finished.
-      setLoading(false);
-    }
-  }, []);
-
-  // Fetch the initial data when the page first loads.
+  // Fetch the initial workspace members and tasks when the page loads.
   useEffect(() => {
+    // Track whether the component is still mounted.
+    let ignore = false;
+
+    async function fetchPeopleData() {
+      try {
+        // Fetch both endpoints at the same time.
+        const [usersResponse, tasksResponse] = await Promise.all([
+          api.get("/users"),
+          api.get("/tasks"),
+        ]);
+
+        // Extract the arrays from the paginated API responses.
+        const userData = Array.isArray(usersResponse.data)
+          ? usersResponse.data
+          : usersResponse.data.data || [];
+
+        const taskData = Array.isArray(tasksResponse.data)
+          ? tasksResponse.data
+          : tasksResponse.data.data || [];
+
+        // Only update state if the component is still mounted.
+        if (!ignore) {
+          setUsers(userData);
+          setTasks(taskData);
+        }
+      } catch (error) {
+        // Display an API error message or a fallback message.
+        if (!ignore) {
+          setError(
+            error.response?.data?.message ||
+              "Unable to load workspace members.",
+          );
+        }
+      } finally {
+        // Stop the loading state once the API requests have finished.
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    // Execute the function to retrieve the workspace data.
     fetchPeopleData();
-  }, [fetchPeopleData]);
+
+    // Prevent state updates if the component unmounts before completion.
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // Store the selected member so their details can be displayed.
   function handleSelectUser(user) {
