@@ -43,22 +43,18 @@ export default function AppShell({ children }) {
   }
 
   // Display a temporary message while the authentication check is running.
-  if (!authenticated) {
-    return <p>Checking authentication...</p>;
-  }
 
-  return (
+  return authenticated ? (
     <div className="app-shell">
-      {/* Pass the sidebar's visibility state and close handler to the Sidebar component. */}
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       <div className="app-wrapper">
-        {/* Pass the toggle handler to the Header for its menu button. */}
         <Header onMenuClick={toggleSidebar} />
 
-        {/* Render the current page inside the shared application layout. */}
         <MainContent>{children}</MainContent>
       </div>
     </div>
+  ) : (
+    <p>Checking authentication...</p>
   );
 }
