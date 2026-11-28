@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import api from "../../../lib/api";
@@ -45,7 +45,8 @@ export default function ProjectDetailsPage() {
   const [deleteError, setDeleteError] = useState("");
 
   // Fetch the project, workspace tasks and milestones from the API.
-  async function fetchProject() {
+  // useCallback keeps the function reference stable between renders.
+  const fetchProject = useCallback(async () => {
     const [projectResponse, tasksResponse, milestonesResponse] =
       await Promise.all([
         api.get(`/projects/${id}`),
@@ -72,7 +73,7 @@ export default function ProjectDetailsPage() {
 
     // Return the project so other functions can inspect its properties.
     return projectResponse.data;
-  }
+  }, [id]);
 
   // Retrieve the project and related data when the page loads or URL ID changes.
   useEffect(() => {
@@ -94,8 +95,7 @@ export default function ProjectDetailsPage() {
     if (id) {
       loadProject();
     }
-  }, [id]);
-
+  }, [id, fetchProject]);
   // Filter workspace tasks to show only those belonging to this project.
   const projectTasks = tasks.filter(
     (task) => String(task.project?.id) === String(id),
