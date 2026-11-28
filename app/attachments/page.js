@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import AttachmentList from "../../components/attachments/AttachmentList";
 import api from "../../lib/api";
 import AppShell from "../../components/layout/AppShell";
@@ -15,34 +15,45 @@ export default function AttachmentsPage() {
   // Store any errors encountered when retrieving attachments.
   const [error, setError] = useState("");
 
-  // Fetch all attachments belonging to the current workspace.
-  // useCallback keeps the function reference stable between renders.
-  const fetchAttachments = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      // Send a GET request to retrieve the workspace attachments.
-      const response = await api.get("/attachments");
-
-      // Extract the attachment records from the paginated API response.
-      const attachmentData = response.data.data;
-
-      // Update React state with the retrieved attachments.
-      setAttachments(attachmentData);
-    } catch (error) {
-      // Display the API error message or a fallback message.
-      setError(error.response?.data?.message || "Unable to load attachments.");
-    } finally {
-      // Stop displaying the loading message once the request finishes.
-      setLoading(false);
-    }
-  }, []);
-
   // Retrieve attachments when the page first loads.
   useEffect(() => {
-    fetchAttachments();
-  }, [fetchAttachments]);
+    // Prevent state updates if the component unmounts before the request finishes.
+    let ignore = false;
+
+    async function loadAttachments() {
+      try {
+        // Send a GET request to retrieve the workspace attachments.
+        const response = await api.get("/attachments");
+
+        // Extract the attachment records from the paginated API response.
+        const attachmentData = response.data.data;
+
+        // Only update state if the component is still mounted.
+        if (!ignore) {
+          setAttachments(attachmentData);
+        }
+      } catch (error) {
+        // Display the API error message or a fallback message.
+        if (!ignore) {
+          setError(
+            error.response?.data?.message || "Unable to load attachments.",
+          );
+        }
+      } finally {
+        // Stop displaying the loading message once the request finishes.
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAttachments();
+
+    // Prevent updates to an unmounted component.
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // Display a loading message while the initial request is processing.
   if (loading) {
@@ -72,6 +83,7 @@ export default function AttachmentsPage() {
             <p>Track attachments.</p>
           </div>
         </div>
+
         {/* Display the current attachment list. */}
         <AttachmentList attachments={attachments} />
 
