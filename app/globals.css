@@ -169,7 +169,7 @@ select.ui-form-control {
 }
 
 .ui-form-error {
-  color: #f87171;
+  color: #f87171 !important;
   font-size: 12px;
   margin: 4px 0 0;
 }

@@ -20,20 +20,26 @@ export default function ProjectForm({
     initialProject?.description || "",
   );
 
+  const [validationError, setValidationError] = useState("");
+
   // Determine whether the form is being used to create or edit a project.
   const isEditing = Boolean(initialProject);
 
   function handleSubmit(event) {
-    // Prevent the browser's default form submission and page refresh.
     event.preventDefault();
 
-    // Pass the form data to the parent component for API submission.
+    if (!name.trim()) {
+      setValidationError("Project name is required.");
+      return;
+    }
+
+    setValidationError("");
+
     onSubmit({
-      name,
+      name: name.trim(),
       description,
     });
   }
-
   return (
     <Modal
       // Change the modal title and description depending on the operation.
@@ -55,7 +61,6 @@ export default function ProjectForm({
           // Update the name state whenever the user changes the input.
           onChange={(event) => setName(event.target.value)}
           placeholder="Enter project name"
-          required
         />
 
         {/* Hidden input retained from the original form implementation. */}
@@ -72,7 +77,9 @@ export default function ProjectForm({
         />
 
         {/* Display any validation or API error passed down from the parent. */}
-        {error && <p className="ui-form-error">{error}</p>}
+        {(validationError || error) && (
+          <p className="ui-form-error">{validationError || error}</p>
+        )}
 
         <div className="project-modal-actions">
           <Button

@@ -33,13 +33,45 @@ export default function TaskForm({
     initialValues?.assigned_to?.id || initialValues?.assigned_to || "",
   );
 
+  // Store validation errors before submitting the form.
+  const [validationError, setValidationError] = useState("");
+
   function handleSubmit(event) {
     // Prevent the browser's default form submission and page refresh.
     event.preventDefault();
 
+    // Validate the required fields before submitting the task.
+    if (!name.trim()) {
+      setValidationError("Task name is required.");
+      return;
+    }
+
+    if (!description.trim()) {
+      setValidationError("Task description is required.");
+      return;
+    }
+
+    if (!projectId) {
+      setValidationError("Please select a project.");
+      return;
+    }
+
+    if (!assignedTo) {
+      setValidationError("Please select a user.");
+      return;
+    }
+
+    if (!dueDate) {
+      setValidationError("Please select a due date.");
+      return;
+    }
+
+    // Clear validation errors when all required fields are valid.
+    setValidationError("");
+
     // Pass the collected form values to the parent component for API submission.
     onSubmit({
-      name,
+      name: name.trim(),
       description,
       status,
       due_date: dueDate,
@@ -63,9 +95,11 @@ export default function TaskForm({
           name="task-name"
           value={name}
           // Update the task name state whenever the input changes.
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => {
+            setName(event.target.value);
+            setValidationError("");
+          }}
           placeholder="Enter task name"
-          required
         />
 
         <FormField
@@ -73,10 +107,12 @@ export default function TaskForm({
           name="task-description"
           type="textarea"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) => {
+            setDescription(event.target.value);
+            setValidationError("");
+          }}
           placeholder="Describe the task"
           rows={4}
-          required
         />
 
         <FormField
@@ -84,14 +120,16 @@ export default function TaskForm({
           name="task-project"
           type="select"
           value={projectId}
-          onChange={(event) => setProjectId(event.target.value)}
+          onChange={(event) => {
+            setProjectId(event.target.value);
+            setValidationError("");
+          }}
           placeholder="Select a project"
           // Convert the projects array into the options format expected by FormField.
           options={projects.map((project) => ({
             value: project.id,
             label: project.name,
           }))}
-          required
         />
 
         <FormField
@@ -99,14 +137,16 @@ export default function TaskForm({
           name="task-assignee"
           type="select"
           value={assignedTo}
-          onChange={(event) => setAssignedTo(event.target.value)}
+          onChange={(event) => {
+            setAssignedTo(event.target.value);
+            setValidationError("");
+          }}
           placeholder="Select a user"
           // Convert the users array into selectable user options.
           options={users.map((user) => ({
             value: user.id,
             label: user.name,
           }))}
-          required
         />
 
         <div className="form-row">
@@ -129,13 +169,17 @@ export default function TaskForm({
             name="task-due-date"
             type="date"
             value={dueDate}
-            onChange={(event) => setDueDate(event.target.value)}
-            required
+            onChange={(event) => {
+              setDueDate(event.target.value);
+              setValidationError("");
+            }}
           />
         </div>
 
-        {/* Display any validation or API error passed down from the parent. */}
-        {error && <p className="ui-form-error">{error}</p>}
+        {/* Display either a client-side validation error or an API error. */}
+        {(validationError || error) && (
+          <p className="ui-form-error">{validationError || error}</p>
+        )}
 
         <div className="project-modal-actions">
           <Button variant="secondary" onClick={onClose} disabled={loading}>
