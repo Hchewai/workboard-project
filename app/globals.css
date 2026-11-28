@@ -189,6 +189,20 @@ select.ui-form-control {
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(3px);
 }
+/* Tags */
+.tag-color-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 8px;
+}
+
+.tag-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 /* Modal container */
 .ui-modal {
