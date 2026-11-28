@@ -9,7 +9,6 @@ import ProjectForm from "../../components/projects/ProjectForm";
 import Button from "../../components/ui/Button";
 
 export default function ProjectsPage() {
-  // throw new Error("Testing the Workboard error boundary");
   // Control whether the create project modal is visible.
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -100,7 +99,21 @@ export default function ProjectsPage() {
 
   // Fetch the initial project list when the page first loads.
   useEffect(() => {
-    fetchProjects();
+    let ignore = false;
+
+    async function loadProjects() {
+      await fetchProjects();
+    }
+
+    // Only start the request if the component is still mounted.
+    if (!ignore) {
+      loadProjects();
+    }
+
+    // Prevent further state updates if the component unmounts.
+    return () => {
+      ignore = true;
+    };
   }, [fetchProjects]);
 
   // Handle creating a new project.
