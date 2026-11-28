@@ -8,6 +8,7 @@ import {
   CheckSquare,
   CalendarDays,
   Layers,
+  Tags,
   X,
   LogOut,
 } from "lucide-react";
@@ -31,6 +32,11 @@ const navigation = [
     name: "My Tasks",
     href: "/tasks",
     icon: CheckSquare,
+  },
+  {
+    name: "Tags",
+    href: "/tags",
+    icon: Tags,
   },
   {
     name: "Milestones",
