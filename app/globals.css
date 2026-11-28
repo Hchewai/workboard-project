@@ -2365,3 +2365,34 @@ select.ui-form-control {
     font-size: 10px;
   }
 }
+
+/* Application error boundary */
+.error-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 24px;
+}
+
+.error-panel {
+  width: 100%;
+  max-width: 480px;
+  padding: 36px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.error-panel h1 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+
+.error-panel p {
+  margin: 0 0 24px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}

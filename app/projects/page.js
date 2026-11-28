@@ -9,6 +9,7 @@ import ProjectForm from "../../components/projects/ProjectForm";
 import Button from "../../components/ui/Button";
 
 export default function ProjectsPage() {
+  // throw new Error("Testing the Workboard error boundary");
   // Control whether the create project modal is visible.
   const [isModalOpen, setIsModalOpen] = useState(false);
 
