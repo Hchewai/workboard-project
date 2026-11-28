@@ -28,6 +28,9 @@ export default function AppShell({ children }) {
     }
 
     // Allow the application layout to render once a token is found.
+    // This state update is intentional because authentication is checked
+    // after mounting, when browser sessionStorage is available.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAuthenticated(true);
   }, [router]);
 
