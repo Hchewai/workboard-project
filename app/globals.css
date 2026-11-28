@@ -1382,6 +1382,131 @@ select.ui-form-control {
   }
 }
 
+/* Milestone list */
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Individual milestone row */
+.milestone-list-item {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.milestone-list-item:first-child {
+  padding-top: 8px;
+}
+
+.milestone-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Milestone icon */
+.milestone-list-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--surface-secondary);
+  color: var(--accent);
+}
+
+/* Milestone information */
+.milestone-list-info {
+  min-width: 0;
+}
+
+.milestone-list-info h3 {
+  margin: 0 0 5px;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.milestone-list-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* Due date */
+.milestone-list-date {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Management actions */
+.milestone-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.milestone-card-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.milestone-card-actions button:hover {
+  color: var(--text-primary);
+  background: var(--surface);
+}
+
+.milestone-card-actions button:last-child:hover {
+  color: #ef4444;
+}
+
+.milestone-card-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive milestone layout */
+@media (max-width: 576px) {
+  .milestone-list-item {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .milestone-list-date {
+    grid-column: 2;
+    grid-row: 2;
+    white-space: normal;
+  }
+
+  .milestone-card-actions {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
 /* Responsive dashboard layout. */
 @media (max-width: 900px) {
   .project-dashboard-columns {

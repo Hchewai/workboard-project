@@ -46,11 +46,6 @@ const navigation = [
     icon: Tags,
   },
   {
-    name: "Milestones",
-    href: "/milestones",
-    icon: CalendarDays,
-  },
-  {
     name: "Attachments",
     href: "/attachments",
     icon: Paperclip,

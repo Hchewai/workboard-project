@@ -10,7 +10,7 @@ import Button from "../../../components/ui/Button";
 import CommentsSection from "../../../components/comments/CommentsSection";
 import TaskList from "../../../components/tasks/TaskList";
 import MilestoneList from "../../../components/milestones/MilestoneList";
-
+import MilestoneForm from "../../../components/milestones/MilestoneForm";
 export default function ProjectDetailsPage() {
   // Retrieve the project ID from the dynamic URL.
   const { id } = useParams();
@@ -27,7 +27,13 @@ export default function ProjectDetailsPage() {
   // Store page-level errors and errors related to the edit modal.
   const [error, setError] = useState("");
   const [modalError, setModalError] = useState("");
+  // Control the milestone form and track the selected milestone.
+  const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState(null);
 
+  // Track milestone saving, deletion and associated errors.
+  const [milestoneLoading, setMilestoneLoading] = useState(false);
+  const [milestoneError, setMilestoneError] = useState("");
   // Control the visibility of the edit project modal.
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -179,6 +185,177 @@ export default function ProjectDetailsPage() {
     } finally {
       // Re-enable the edit form once the update process finishes.
       setUpdating(false);
+    }
+  }
+
+  // Open the form to create a milestone for the current project.
+  function openCreateMilestone() {
+    setSelectedMilestone(null);
+    setMilestoneError("");
+    setIsMilestoneModalOpen(true);
+  }
+
+  // Open the form with the selected milestone's existing information.
+  function openEditMilestone(milestone) {
+    setSelectedMilestone(milestone);
+    setMilestoneError("");
+    setIsMilestoneModalOpen(true);
+  }
+
+  // Create or update a milestone using the shared MilestoneForm.
+  async function handleSaveMilestone(milestoneData) {
+    const isEditing = Boolean(selectedMilestone);
+
+    try {
+      setMilestoneLoading(true);
+      setMilestoneError("");
+
+      if (isEditing) {
+        // Update the selected milestone.
+        await api.put(`/milestones/${selectedMilestone.id}`, milestoneData);
+
+        let updatedMilestone = null;
+
+        // Poll the individual milestone endpoint until the changes appear.
+        for (let attempt = 0; attempt < 30; attempt++) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          const response = await api.get(`/milestones/${selectedMilestone.id}`);
+
+          const currentMilestone = response.data;
+
+          // Confirm that the updated values match the submitted information.
+          if (
+            currentMilestone.title === milestoneData.title &&
+            currentMilestone.description === milestoneData.description &&
+            currentMilestone.due_date === milestoneData.due_date &&
+            String(currentMilestone.project?.id) === String(id)
+          ) {
+            updatedMilestone = currentMilestone;
+            break;
+          }
+        }
+
+        if (!updatedMilestone) {
+          setMilestoneError(
+            "The API accepted the update, but the changes haven't appeared yet. Please refresh shortly.",
+          );
+          return;
+        }
+
+        // Replace the old milestone with the updated API response.
+        setMilestones((previous) =>
+          previous.map((milestone) =>
+            String(milestone.id) === String(updatedMilestone.id)
+              ? updatedMilestone
+              : milestone,
+          ),
+        );
+      } else {
+        // Record existing IDs to identify the newly created milestone.
+        const existingIds = new Set(
+          milestones.map((milestone) => String(milestone.id)),
+        );
+
+        // Create the milestone using the current project's information.
+        await api.post("/milestones", milestoneData);
+
+        let createdMilestone = null;
+
+        // Poll the milestones endpoint until the new record appears.
+        for (let attempt = 0; attempt < 30; attempt++) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          const response = await api.get("/milestones");
+
+          const latestMilestones = Array.isArray(response.data)
+            ? response.data
+            : response.data.data || [];
+
+          // Identify the new milestone by its project, title and previously unseen ID.
+          createdMilestone = latestMilestones.find(
+            (milestone) =>
+              String(milestone.project?.id) === String(id) &&
+              milestone.title === milestoneData.title &&
+              !existingIds.has(String(milestone.id)),
+          );
+
+          if (createdMilestone) {
+            setMilestones(latestMilestones);
+            break;
+          }
+        }
+
+        if (!createdMilestone) {
+          setMilestoneError(
+            "The API accepted the milestone, but it hasn't appeared yet. Please refresh shortly.",
+          );
+          return;
+        }
+      }
+
+      // Close the form once the API confirms the operation.
+      setIsMilestoneModalOpen(false);
+      setSelectedMilestone(null);
+    } catch (error) {
+      // Display an API error if the operation fails.
+      setMilestoneError(
+        error.response?.data?.message || "Unable to save milestone.",
+      );
+    } finally {
+      setMilestoneLoading(false);
+    }
+  }
+
+  // Delete a milestone associated with the current project.
+  async function handleDeleteMilestone(milestone) {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${milestone.title}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setMilestoneLoading(true);
+      setMilestoneError("");
+
+      // Send the deletion request to the API.
+      await api.delete(`/milestones/${milestone.id}`);
+
+      let milestoneDeleted = false;
+
+      // Poll the individual milestone endpoint until it returns a 404.
+      for (let attempt = 0; attempt < 30; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        try {
+          await api.get(`/milestones/${milestone.id}`);
+        } catch (error) {
+          if (error.response?.status === 404) {
+            milestoneDeleted = true;
+            break;
+          }
+
+          throw error;
+        }
+      }
+
+      if (milestoneDeleted) {
+        // Remove the deleted milestone from the displayed list.
+        setMilestones((previous) =>
+          previous.filter((item) => String(item.id) !== String(milestone.id)),
+        );
+      } else {
+        setMilestoneError(
+          "The API accepted the deletion, but the milestone still appears to exist. Please refresh shortly.",
+        );
+      }
+    } catch (error) {
+      setMilestoneError(
+        error.response?.data?.message || "Unable to delete milestone.",
+      );
+    } finally {
+      setMilestoneLoading(false);
     }
   }
 
@@ -340,10 +517,26 @@ export default function ProjectDetailsPage() {
           <div className="project-dashboard-column">
             <div className="project-dashboard-heading">
               <h2>Milestones</h2>
+
               <span>{projectMilestones.length}</span>
             </div>
 
-            <MilestoneList milestones={projectMilestones} />
+            {/* Allow users to create milestones directly from this project. */}
+            <div className="project-milestone-actions">
+              <Button onClick={openCreateMilestone} disabled={milestoneLoading}>
+                New Milestone
+              </Button>
+            </div>
+
+            {/* Display errors returned during milestone operations. */}
+            {milestoneError && <p className="form-error">{milestoneError}</p>}
+
+            <MilestoneList
+              milestones={projectMilestones}
+              onEdit={openEditMilestone}
+              onDelete={handleDeleteMilestone}
+              loading={milestoneLoading}
+            />
           </div>
         </div>
 
@@ -353,6 +546,23 @@ export default function ProjectDetailsPage() {
         {/* Display any errors returned during the deletion process. */}
         {deleteError && <p className="text-danger">{deleteError}</p>}
 
+        {/* Render the milestone form when creating or editing a milestone. */}
+        {isMilestoneModalOpen && (
+          <MilestoneForm
+            projects={[project]}
+            fixedProject={project}
+            initialValues={selectedMilestone}
+            onClose={() => {
+              if (!milestoneLoading) {
+                setIsMilestoneModalOpen(false);
+                setSelectedMilestone(null);
+              }
+            }}
+            onSubmit={handleSaveMilestone}
+            loading={milestoneLoading}
+            error={milestoneError}
+          />
+        )}
         {/* Only render ProjectForm when the edit modal is open. */}
         {isModalOpen && (
           <ProjectForm

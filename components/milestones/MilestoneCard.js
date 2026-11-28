@@ -1,40 +1,50 @@
-import Link from "next/link";
-import { CalendarDays, ArrowUpRight, Flag } from "lucide-react";
+import { CalendarDays, Flag, Pencil, Trash2 } from "lucide-react";
 
-export default function MilestoneCard({ milestone }) {
+export default function MilestoneCard({
+  milestone,
+  onEdit,
+  onDelete,
+  loading,
+}) {
   return (
-    // Make the entire milestone card clickable and link to its detail page.
-    <Link href={`/milestones/${milestone.id}`} className="project-card">
-      <div className="project-card-header">
-        <div className="project-icon">
-          <Flag size={20} />
-        </div>
+    <article className="milestone-list-item">
+      {/* Milestone icon */}
+      <div className="milestone-list-icon">
+        <Flag size={20} />
       </div>
 
-      <div className="project-card-info">
+      {/* Milestone title and description */}
+      <div className="milestone-list-info">
         <h3>{milestone.title}</h3>
-
-        {/* Display a fallback message if the milestone has no description. */}
         <p>{milestone.description || "No description provided."}</p>
       </div>
 
-      <div className="project-card-footer">
-        <span>
-          <CalendarDays size={14} />
-          {/* Display the milestone's due date or a fallback message. */}
-          {milestone.due_date || "No due date"}
-        </span>
-
-        {/* Visual indicator that the milestone card can be opened. */}
-        <span className="project-card-link">
-          View milestone <ArrowUpRight size={15} />
-        </span>
+      {/* Display the milestone due date */}
+      <div className="milestone-list-date">
+        <CalendarDays size={16} />
+        <span>{milestone.due_date || "No due date"}</span>
       </div>
 
-      {/* Only display the associated project if its name is available. */}
-      {milestone.project?.name && (
-        <span className="task-project">{milestone.project.name}</span>
-      )}
-    </Link>
+      {/* Milestone management actions */}
+      <div className="milestone-card-actions">
+        <button
+          type="button"
+          onClick={() => onEdit(milestone)}
+          disabled={loading}
+          aria-label={`Edit ${milestone.title}`}
+        >
+          <Pencil size={16} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onDelete(milestone)}
+          disabled={loading}
+          aria-label={`Delete ${milestone.title}`}
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </article>
   );
 }

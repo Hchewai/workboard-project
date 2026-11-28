@@ -6,7 +6,8 @@ import FormField from "../ui/FormField";
 import Modal from "../ui/Modal";
 
 export default function MilestoneForm({
-  projects,
+  projects = [],
+  fixedProject = null,
   onClose,
   onSubmit,
   loading,
@@ -14,12 +15,13 @@ export default function MilestoneForm({
   initialValues = null,
 }) {
   // Initialise form fields using existing milestone data when editing.
-  // If no initial values are provided, use empty strings for a new milestone.
   const [title, setTitle] = useState(initialValues?.title || "");
   const [description, setDescription] = useState(
     initialValues?.description || "",
   );
-  const [projectId, setProjectId] = useState(initialValues?.project?.id || "");
+  const [projectId, setProjectId] = useState(
+    fixedProject?.id || initialValues?.project?.id || "",
+  );
   const [dueDate, setDueDate] = useState(initialValues?.due_date || "");
 
   // Store validation errors before submitting the form.
@@ -29,7 +31,6 @@ export default function MilestoneForm({
   const isEditing = Boolean(initialValues);
 
   function handleSubmit(event) {
-    // Prevent the browser's default form submission and page refresh.
     event.preventDefault();
 
     // Validate the required fields before submitting the milestone.
@@ -43,8 +44,12 @@ export default function MilestoneForm({
       return;
     }
 
-    if (!projectId) {
-      setValidationError("Please select a project.");
+    const selectedProject =
+      fixedProject ||
+      projects.find((project) => String(project.id) === String(projectId));
+
+    if (!selectedProject) {
+      setValidationError("The selected project could not be found.");
       return;
     }
 
@@ -53,44 +58,24 @@ export default function MilestoneForm({
       return;
     }
 
-    // Find the full project object that matches the selected project ID.
-    const selectedProject = projects.find(
-      (project) => String(project.id) === String(projectId),
-    );
-
-    // Stop submission if the selected project cannot be found.
-    if (!selectedProject) {
-      setValidationError("The selected project could not be found.");
-      return;
-    }
-
-    // Clear validation errors when all required fields are valid.
     setValidationError("");
 
     // Pass the milestone data to the parent component for API submission.
     onSubmit({
       project_id: selectedProject.id,
-
-      // Retrieve the workspace ID from the available project or milestone data.
-      // This accounts for different ways the API may structure the workspace relationship.
       workspace_id:
         selectedProject.workspace?.id ||
         selectedProject.workspace_id ||
         initialValues?.workspace?.id,
-
       title: title.trim(),
       description,
       due_date: dueDate,
-
-      // Preserve the existing completion date when editing.
-      // Otherwise, send null for a new milestone.
       completed_at: initialValues?.completed_at || null,
     });
   }
 
   return (
     <Modal
-      // Change the modal title depending on whether a milestone is being created or edited.
       title={isEditing ? "Edit Milestone" : "Create Milestone"}
       onClose={onClose}
       closeDisabled={loading}
@@ -100,7 +85,6 @@ export default function MilestoneForm({
           label="Milestone Title"
           name="milestone-title"
           value={title}
-          // Update the title state whenever the user changes the input.
           onChange={(event) => {
             setTitle(event.target.value);
             setValidationError("");
@@ -120,21 +104,23 @@ export default function MilestoneForm({
           placeholder="Describe the milestone"
         />
 
-        <FormField
-          label="Project"
-          name="milestone-project"
-          type="select"
-          value={projectId}
-          onChange={(event) => {
-            setProjectId(event.target.value);
-            setValidationError("");
-          }}
-          // Convert the projects array into the format expected by FormField.
-          options={projects.map((project) => ({
-            value: project.id,
-            label: project.name,
-          }))}
-        />
+        {/* Only show the project selector when a fixed project was not supplied. */}
+        {!fixedProject && (
+          <FormField
+            label="Project"
+            name="milestone-project"
+            type="select"
+            value={projectId}
+            onChange={(event) => {
+              setProjectId(event.target.value);
+              setValidationError("");
+            }}
+            options={projects.map((project) => ({
+              value: project.id,
+              label: project.name,
+            }))}
+          />
+        )}
 
         <FormField
           label="Due Date"
@@ -147,7 +133,6 @@ export default function MilestoneForm({
           }}
         />
 
-        {/* Display either a client-side validation error or an API error. */}
         {(validationError || error) && (
           <p className="ui-form-error">{validationError || error}</p>
         )}
@@ -160,10 +145,8 @@ export default function MilestoneForm({
           <Button
             type="submit"
             loading={loading}
-            // Display different loading text depending on the current operation.
             loadingText={isEditing ? "Saving..." : "Creating..."}
           >
-            {/* Change the submit button label depending on the form's purpose. */}
             {isEditing ? "Save Changes" : "Create Milestone"}
           </Button>
         </div>
