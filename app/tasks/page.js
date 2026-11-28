@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import api from "../../lib/api";
@@ -37,30 +37,45 @@ export default function TasksPage() {
   // Store errors from operations performed after task creation.
   const [actionError, setActionError] = useState("");
 
-  // Fetch all tasks from the API.
-  // useCallback keeps the function reference stable between renders.
-  const fetchTasks = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // Fetch the initial task list when the page first loads.
+  useEffect(() => {
+    // Prevent state updates if the component unmounts before the request finishes.
+    let ignore = false;
 
-      // Send a GET request to retrieve the tasks.
-      const response = await api.get("/tasks");
+    async function loadTasks() {
+      try {
+        // Send a GET request to retrieve the tasks.
+        const response = await api.get("/tasks");
 
-      // Extract the task array from the API response.
-      const taskData = response.data.data;
+        // Stop if the component has unmounted.
+        if (ignore) return;
 
-      // Store the retrieved tasks in React state.
-      setTasks(taskData);
-    } catch (error) {
-      // Display the API error message or a fallback message.
-      setError(error.response?.data?.message || "Unable to load tasks.");
-    } finally {
-      // Stop the loading state regardless of whether the request succeeds or fails.
-      setLoading(false);
+        // Extract the task array from the API response.
+        const taskData = response.data.data;
+
+        // Store the retrieved tasks in React state.
+        setTasks(taskData);
+      } catch (error) {
+        // Only update the error state if the component is still mounted.
+        if (ignore) return;
+
+        // Display the API error message or a fallback message.
+        setError(error.response?.data?.message || "Unable to load tasks.");
+      } finally {
+        // Stop the loading state once the request finishes.
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
     }
-  }, []);
 
+    loadTasks();
+
+    // Mark the request as ignored if the component unmounts.
+    return () => {
+      ignore = true;
+    };
+  }, []);
   // Retrieve projects, users and tags before opening the create task modal.
   async function openTaskModal() {
     try {
@@ -189,11 +204,6 @@ export default function TasksPage() {
       setCreating(false);
     }
   }
-
-  // Fetch the initial task list when the page first loads.
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
 
   // Filter tasks based on the text entered into the search field.
   const filteredTasks = tasks.filter((task) => {
