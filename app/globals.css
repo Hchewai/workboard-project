@@ -1628,3 +1628,83 @@ select.ui-form-control {
   margin-bottom: 0;
   white-space: pre-wrap;
 }
+
+/* Container for all attachment rows. */
+.attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Individual attachment row. */
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* File icon container. */
+.attachment-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 1.4rem;
+}
+
+/* Attachment filename and metadata. */
+.attachment-info {
+  min-width: 0;
+}
+
+.attachment-info h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.attachment-info p {
+  margin: 2px 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.attachment-path {
+  overflow-wrap: anywhere;
+}
+
+/* Empty state when no attachments exist. */
+.attachment-empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.attachment-empty-state p {
+  color: var(--text-secondary);
+}
+
+/* Adjust the row for smaller screens. */
+@media (max-width: 576px) {
+  .attachment-item {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .attachment-icon {
+    width: 44px;
+    height: 44px;
+  }
+}

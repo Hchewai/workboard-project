@@ -9,6 +9,7 @@ import {
   CalendarDays,
   Layers,
   Tags,
+  Paperclip,
   X,
   LogOut,
 } from "lucide-react";
@@ -42,6 +43,11 @@ const navigation = [
     name: "Milestones",
     href: "/milestones",
     icon: CalendarDays,
+  },
+  {
+    name: "Attachments",
+    href: "/attachments",
+    icon: Paperclip,
   },
 ];
 
