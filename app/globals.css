@@ -204,6 +204,54 @@ select.ui-form-control {
   gap: 8px;
 }
 
+.task-tag-selection {
+  margin-bottom: 1rem;
+}
+
+.task-tag-selection > label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.task-tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.task-tag-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+/* Arrange task tags horizontally with consistent spacing. */
+.task-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Display each tag as a rounded coloured badge. */
+.task-detail-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 20px;
+
+  background-color: color-mix(in srgb, var(--tag-color) 18%, transparent);
+
+  border: 1px solid color-mix(in srgb, var(--tag-color) 45%, transparent);
+
+  color: var(--tag-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 /* Modal container */
 .ui-modal {
   width: 100%;

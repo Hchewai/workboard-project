@@ -26,12 +26,16 @@ export default function TasksPage() {
   const [creating, setCreating] = useState(false);
   const [modalError, setModalError] = useState("");
 
-  // Store projects and users used to populate the TaskForm dropdowns.
+  // Store projects, users and tags used to populate the TaskForm.
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
+  const [tags, setTags] = useState([]);
 
-  // Track whether the project and user options are being retrieved.
+  // Track whether the form options are being retrieved.
   const [optionsLoading, setOptionsLoading] = useState(false);
+
+  // Store errors from operations performed after task creation.
+  const [actionError, setActionError] = useState("");
 
   // Fetch all tasks from the API.
   // useCallback keeps the function reference stable between renders.
@@ -57,18 +61,18 @@ export default function TasksPage() {
     }
   }, []);
 
-  // Retrieve projects and users before opening the create task modal.
+  // Retrieve projects, users and tags before opening the create task modal.
   async function openTaskModal() {
     try {
       setOptionsLoading(true);
       setModalError("");
+      setActionError("");
 
-      // Promise.all sends both API requests concurrently.
-      // Both requests must finish before the form can be opened.
-      const [projectsResponse, usersResponse] = await Promise.all([
-        api.get("/projects"),
-        api.get("/users"),
-      ]);
+      // Promise.all sends all three API requests concurrently.
+      // The form only opens once all three requests have finished.
+      const [projectsResponse, usersResponse, tagsResponse] = await Promise.all(
+        [api.get("/projects"), api.get("/users"), api.get("/tags")],
+      );
 
       // Extract the project array from the API response.
       const projectData = projectsResponse.data.data;
@@ -78,17 +82,23 @@ export default function TasksPage() {
         ? usersResponse.data
         : usersResponse.data.data;
 
-      // Store the available projects and users for the form dropdowns.
+      // Support both direct array responses and arrays nested inside data.
+      const tagData = Array.isArray(tagsResponse.data)
+        ? tagsResponse.data
+        : tagsResponse.data.data;
+
+      // Store the available options for the TaskForm.
       setProjects(projectData);
       setUsers(userData);
+      setTags(tagData);
 
-      // Open the modal once both sets of options have loaded successfully.
+      // Open the modal once all options have loaded successfully.
       setIsModalOpen(true);
     } catch (error) {
-      // Display an error if either API request fails.
+      // Display an error if any of the required API requests fail.
       setModalError(
         error.response?.data?.message ||
-          "Unable to load project and user options.",
+          "Unable to load project, user and tag options.",
       );
     } finally {
       // Stop the options loading state after the requests finish.
@@ -101,13 +111,18 @@ export default function TasksPage() {
     try {
       setCreating(true);
       setModalError("");
+      setActionError("");
+
+      // Separate tag IDs from the task information.
+      // Tags are assigned through a dedicated API endpoint.
+      const { tag_ids = [], ...taskPayload } = taskData;
 
       // Record the IDs of existing tasks before creating the new task.
       // This helps distinguish the newly created task from existing records.
-      const existingIds = tasks.map((task) => task.id);
+      const existingIds = tasks.map((task) => String(task.id));
 
-      // Send a POST request containing the new task information.
-      await api.post("/tasks", taskData);
+      // Send a POST request containing only the task information.
+      await api.post("/tasks", taskPayload);
 
       // The API processes task creation asynchronously,
       // so periodically check whether the new task has appeared.
@@ -128,7 +143,8 @@ export default function TasksPage() {
         // and matches the name submitted through the form.
         createdTask = updatedTasks.find(
           (task) =>
-            !existingIds.includes(task.id) && task.name === taskData.name,
+            !existingIds.includes(String(task.id)) &&
+            task.name === taskPayload.name,
         );
 
         // Once the new task is found, update the task list and stop polling.
@@ -141,6 +157,23 @@ export default function TasksPage() {
       if (createdTask) {
         // Close the modal once the newly created task is confirmed.
         setIsModalOpen(false);
+
+        // Only send a sync request if the user selected at least one tag.
+        if (tag_ids.length > 0) {
+          try {
+            // Assign the selected tags to the newly created task.
+            // The sync endpoint replaces the task's complete tag collection.
+            await api.put(`/tasks/${createdTask.id}/tags`, {
+              tag_ids,
+            });
+          } catch (error) {
+            // The task was created successfully, but its tags could not be assigned.
+            setActionError(
+              error.response?.data?.message ||
+                "Task created, but its tags could not be assigned.",
+            );
+          }
+        }
       } else {
         // The creation request succeeded, but the task was not found
         // after all polling attempts.
@@ -217,7 +250,7 @@ export default function TasksPage() {
           </div>
 
           {/* Only render TaskForm while the create modal is open.
-              Pass the available projects, users and creation handler as props. */}
+              Pass projects, users, tags and the creation handler as props. */}
           {isModalOpen && (
             <TaskForm
               onClose={() => setIsModalOpen(false)}
@@ -226,6 +259,7 @@ export default function TasksPage() {
               error={modalError}
               projects={projects}
               users={users}
+              tags={tags}
             />
           )}
 
@@ -236,10 +270,13 @@ export default function TasksPage() {
             onClick={openTaskModal}
             disabled={optionsLoading}
           >
-            {/* Change the label while the project and user options load. */}
+            {/* Change the label while the form options load. */}
             {optionsLoading ? "Loading..." : "+ New Task"}
           </button>
         </div>
+
+        {/* Display errors from operations performed after task creation. */}
+        {actionError && <p className="form-error">{actionError}</p>}
 
         {/* Search field used to filter the displayed tasks. */}
         <div className="task-search">
@@ -250,7 +287,6 @@ export default function TasksPage() {
             placeholder="Search tasks..."
             aria-label="Search tasks"
             value={searchQuery}
-            // Update the search query whenever the user types.
             onChange={(event) => setSearchQuery(event.target.value)}
           />
 
@@ -259,7 +295,6 @@ export default function TasksPage() {
             <button
               type="button"
               aria-label="Clear search"
-              // Resetting the query restores the complete task list.
               onClick={() => setSearchQuery("")}
             >
               <X size={18} />

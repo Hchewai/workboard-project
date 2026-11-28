@@ -31,6 +31,9 @@ export default function TaskDetailsPage() {
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
 
+  // Store workspace tags available for assignment to the task.
+  const [tags, setTags] = useState([]);
+
   // Track task-related actions, such as editing and deleting.
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState("");
@@ -122,17 +125,17 @@ export default function TaskDetailsPage() {
   }, [id]);
 
   // Retrieve the projects and users required by the edit form.
+
+  // Retrieve the projects, users and tags required by the edit form.
   async function openEditModal() {
     try {
       setActionError("");
       setActionLoading(true);
 
-      // Fetch both sets of options concurrently.
-      // Promise.all waits for both requests to finish.
-      const [projectsResponse, usersResponse] = await Promise.all([
-        api.get("/projects"),
-        api.get("/users"),
-      ]);
+      // Fetch all three sets of options concurrently.
+      const [projectsResponse, usersResponse, tagsResponse] = await Promise.all(
+        [api.get("/projects"), api.get("/users"), api.get("/tags")],
+      );
 
       // Extract the project array from the API response.
       const projectData = projectsResponse.data.data;
@@ -142,14 +145,20 @@ export default function TaskDetailsPage() {
         ? usersResponse.data
         : usersResponse.data.data;
 
-      // Store the available projects and users for the edit form.
+      // The tags endpoint returns a JSON array.
+      const tagData = Array.isArray(tagsResponse.data)
+        ? tagsResponse.data
+        : tagsResponse.data.data;
+
+      // Store the available options for the edit form.
       setProjects(projectData);
       setUsers(userData);
+      setTags(tagData);
 
-      // Open the edit modal once the required options have loaded.
+      // Open the edit modal once all options have loaded.
       setIsModalOpen(true);
     } catch (error) {
-      // Display an error if either request fails.
+      // Display an error if any request fails.
       setActionError(
         error.response?.data?.message || "Unable to load edit options.",
       );
@@ -400,60 +409,117 @@ export default function TaskDetailsPage() {
   }
 
   // Handle updating the current task.
+
+  // Handle updating the current task and its assigned tags.
   async function handleUpdateTask(taskData) {
     try {
       setActionLoading(true);
       setActionError("");
 
-      // Send a PUT request containing the updated task information.
-      await api.put(`/tasks/${id}`, taskData);
+      // Separate tag IDs because they use a different API endpoint.
+      const { tag_ids = [], ...taskPayload } = taskData;
 
-      // Check periodically for the updated task.
+      // First, update the task's normal properties.
+      await api.put(`/tasks/${id}`, taskPayload);
+
+      // Wait for the updated task to appear in the API.
       let updatedTask = null;
 
-      // Retry the API request up to 30 times, waiting two seconds between attempts.
+      // Retry up to 30 times, waiting two seconds between requests.
       for (let attempt = 0; attempt < 30; attempt++) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        // Retrieve the latest tasks from the API.
         const response = await api.get("/tasks");
+
         const updatedTasks = Array.isArray(response.data)
           ? response.data
           : response.data.data;
 
-        // Find the task matching the current URL ID.
-        updatedTask = updatedTasks.find((item) => item.id === id);
+        // Find the task being edited.
+        updatedTask = updatedTasks.find(
+          (item) => String(item.id) === String(id),
+        );
 
-        // Compare the returned task properties with the submitted form values.
+        // Check whether the task properties match the submitted values.
         if (
           updatedTask &&
-          updatedTask.name === taskData.name &&
-          updatedTask.description === taskData.description &&
-          updatedTask.status === taskData.status &&
-          updatedTask.due_date === taskData.due_date
+          updatedTask.name === taskPayload.name &&
+          updatedTask.description === taskPayload.description &&
+          updatedTask.status === taskPayload.status &&
+          updatedTask.due_date === taskPayload.due_date
         ) {
-          // Update the task displayed on the page and close the modal.
-          setTask(updatedTask);
-          setIsModalOpen(false);
           break;
         }
       }
 
-      // Check whether the update was confirmed after polling.
+      // Confirm that the normal task update was successful.
       if (
         !updatedTask ||
-        updatedTask.name !== taskData.name ||
-        updatedTask.description !== taskData.description ||
-        updatedTask.status !== taskData.status ||
-        updatedTask.due_date !== taskData.due_date
+        updatedTask.name !== taskPayload.name ||
+        updatedTask.description !== taskPayload.description ||
+        updatedTask.status !== taskPayload.status ||
+        updatedTask.due_date !== taskPayload.due_date
       ) {
-        // Display an error if the API has not reflected the changes.
         setActionError(
-          "The API accepted your update, but the changes haven't appeared yet. Please try refreshing shortly.",
+          "The API accepted your update, but the changes haven't appeared yet. Please refresh shortly.",
         );
+        return;
       }
+
+      // Update the displayed task before synchronising its tags.
+      setTask(updatedTask);
+
+      // Send the selected tag IDs to the dedicated tag synchronisation endpoint.
+      // An empty array removes all tags currently assigned to the task.
+      await api.put(`/tasks/${id}/tags`, {
+        tag_ids,
+      });
+
+      // Wait for the updated tag assignments to appear in the task response.
+      let refreshedTask = null;
+      let tagsSynced = false;
+
+      const expectedTagIds = tag_ids.map(String).sort();
+
+      // Retry up to 15 times, waiting two seconds between requests.
+      for (let attempt = 0; attempt < 15; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const response = await api.get(`/tasks/${id}`);
+        refreshedTask = response.data;
+
+        // Extract the tag IDs returned by the API.
+        const returnedTagIds = (refreshedTask.tags || [])
+          .map((tag) =>
+            typeof tag === "object" ? String(tag.id) : String(tag),
+          )
+          .sort();
+
+        // Check whether the returned tags match the selected tags.
+        tagsSynced =
+          JSON.stringify(returnedTagIds) === JSON.stringify(expectedTagIds);
+
+        if (tagsSynced) {
+          break;
+        }
+      }
+
+      // Update the task displayed on the page with the latest API response.
+      if (refreshedTask) {
+        setTask(refreshedTask);
+      }
+
+      if (!tagsSynced) {
+        setActionError(
+          "The task was updated, but its tag changes haven't appeared yet. Please refresh shortly.",
+        );
+        return;
+      }
+
+      // Close the edit modal once both updates are confirmed.
+      setIsModalOpen(false);
     } catch (error) {
-      // Display an error if the update request or polling fails.
+      // Display an error if either API operation fails.
       setActionError(error.response?.data?.message || "Unable to update task.");
     } finally {
       // Re-enable task actions once the update process finishes.
@@ -573,6 +639,26 @@ export default function TaskDetailsPage() {
 
         {/* Display the task description and its associated information. */}
         <div className="project-detail-card">
+          {/* Display the tags assigned to the current task. */}
+          <div>
+            <strong>Tags</strong>
+
+            <div className="task-detail-tags">
+              {task.tags?.length > 0 ? (
+                task.tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="task-detail-tag"
+                    style={{ backgroundColor: tag.color }}
+                  >
+                    {tag.name}
+                  </span>
+                ))
+              ) : (
+                <p>No tags assigned.</p>
+              )}
+            </div>
+          </div>
           <h2>Description</h2>
           <p>{task.description || "No description provided."}</p>
 
@@ -650,6 +736,7 @@ export default function TaskDetailsPage() {
             projects={projects}
             users={users}
             initialValues={task}
+            tags={tags}
           />
         )}
       </section>
